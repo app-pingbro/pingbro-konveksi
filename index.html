@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<!--
+  ============================================================
+  PING BRO KONVEKSI & SABLON
+  Frontend statis — dijalankan di GitHub Pages.
+  Backend Google Apps Script dipanggil lewat fetch() (lihat js/api.js).
+  Alamat backend diisi di js/config.js.
+  ============================================================
+-->
+<html lang="id" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0F172A">
+  <title>Konveksi &amp; Sablon</title>
+  <!-- Favicon diisi dari Logo Perusahaan saat aplikasi dimuat -->
+  <link id="faviconApp" rel="icon" href="">
+  <link id="faviconApple" rel="apple-touch-icon" href="">
+
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Tipografi: Plus Jakarta Sans (judul) + Inter (isi) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Design system aplikasi -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     LAYAR PIN — penjaga akses aplikasi.
+     Muncul bila belum ada token, token kedaluwarsa, atau PIN diganti.
+     ══════════════════════════════════════════════════════ -->
+<div id="loginScreen" class="login-screen" hidden>
+  <form class="login-card" onsubmit="kirimPin(event)">
+    <div class="login-logo logo-plate" role="img" aria-label="Logo PING BRO"></div>
+    <h1 class="login-title">Konveksi &amp; Sablon</h1>
+    <p class="login-sub">Masukkan PIN akses untuk membuka aplikasi</p>
+
+    <label class="login-label" for="pinInput">PIN Akses</label>
+    <input id="pinInput" class="input login-input" type="password" inputmode="numeric"
+           autocomplete="current-password" placeholder="••••••" maxlength="24" required>
+
+    <div id="pinError" class="login-error" hidden></div>
+
+    <button id="pinBtn" type="submit" class="btn-primary btn-block login-btn">
+      <i class="bi bi-unlock"></i> Masuk
+    </button>
+
+    <p class="login-note">
+      Sesi tersimpan 30 hari di perangkat ini. PIN dapat diganti kapan saja
+      lewat <b>Pengaturan → Keamanan</b>.
+    </p>
+  </form>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SPLASH SCREEN — tampil saat aplikasi pertama dimuat
+     ══════════════════════════════════════════════════════ -->
+<div id="splashScreen" class="splash">
+  <div class="splash-topbar">
+    <span class="splash-pill"><span class="dot-live"></span> READY WORKSPACE</span>
+    <span class="splash-pill"><i class="bi bi-hdd-network"></i> Google Sheets DB</span>
+  </div>
+
+  <div class="splash-body">
+    <div class="splash-logo-frame">
+      <!-- Logo resmi PINGBRO — ditampilkan utuh, rasio 1:1, tanpa perubahan desain -->
+      <div class="splash-logo-mark logo-plate" role="img"
+           aria-label="PING BRO — Konveksi &amp; Sablon, Est. 2016"></div>
+    </div>
+
+    <h1 class="splash-title">Konveksi &amp; Sablon</h1>
+    <p class="splash-sub">Aplikasi Manajemen Operasional, Produksi &amp; Keuangan</p>
+
+    <div class="splash-card">
+      <div class="splash-card-head">
+        <span><i class="bi bi-arrow-repeat spin-slow"></i> Sinkronisasi Database Sheets</span>
+        <b id="splashPercent">0%</b>
+      </div>
+      <div class="splash-progress"><div id="splashBar" class="splash-progress-bar"></div></div>
+      <div class="splash-card-foot">
+        <span><span class="dot-teal"></span> <span id="splashSpk">Tabel SPK: memuat…</span></span>
+        <span><span class="dot-navy"></span> <span id="splashInv">Invoice Sync: —</span></span>
+      </div>
+    </div>
+
+    <button id="splashBtn" class="splash-btn" onclick="masukAplikasi()" disabled>
+      <span>Buka Dashboard</span> <i class="bi bi-arrow-right"></i>
+    </button>
+    <p id="splashHint" class="splash-hint">Menyiapkan data operasional &amp; database Sheets…</p>
+  </div>
+
+  <div class="splash-footer">
+    <div><i class="bi bi-google"></i> Powered by Google Apps Script Workspace</div>
+    <div class="splash-version">v1.0.0 (Owner Single-User Mode) &nbsp;·&nbsp;
+      <span>PINGBRO Production Studio</span></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     SIDEBAR (Desktop / Tablet ≥ 992px)
+     ══════════════════════════════════════════════════════ -->
+<aside id="sidebar" class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-mark logo-plate" id="brandLogoBox" role="img" aria-label="Logo PINGBRO"></div>
+    <div class="brand-text">
+      <strong id="brandName">PINGBRO</strong>
+      <span>KONVEKSI &amp; SABLON</span>
+    </div>
+  </div>
+
+  <button class="btn-fab-side" onclick="navigateTo('tambah')">
+    <i class="bi bi-plus-circle"></i> Tambah Order
+  </button>
+
+  <nav class="sidebar-nav">
+    <a href="javascript:void(0)" class="nav-item active" data-section="dashboard" onclick="navigateTo('dashboard')">
+      <i class="bi bi-grid-1x2"></i><span>Dashboard</span>
+    </a>
+    <a href="javascript:void(0)" class="nav-item" data-section="daftar" onclick="navigateTo('daftar')">
+      <i class="bi bi-list-ul"></i><span>Order &amp; Filter</span>
+      <span class="nav-badge" id="badgeOrder">0</span>
+    </a>
+    <a href="javascript:void(0)" class="nav-item" data-section="tambah" onclick="navigateTo('tambah')">
+      <i class="bi bi-plus-square"></i><span>Tambah Order</span>
+    </a>
+    <a href="javascript:void(0)" class="nav-item" data-section="spk" onclick="navigateTo('spk')">
+      <i class="bi bi-clipboard-check"></i><span>SPK Produksi</span>
+      <span class="nav-badge" id="badgeSpk">0</span>
+    </a>
+    <a href="javascript:void(0)" class="nav-item" data-section="invoice" onclick="navigateTo('invoice')">
+      <i class="bi bi-receipt"></i><span>Invoice &amp; Pembayaran</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-foot">
+    <a href="javascript:void(0)" class="nav-item" data-section="pengaturan" onclick="navigateTo('pengaturan')">
+      <i class="bi bi-gear"></i><span>Pengaturan Sistem</span>
+    </a>
+    <a href="javascript:void(0)" class="nav-item" data-section="bantuan" onclick="navigateTo('bantuan')">
+      <i class="bi bi-question-circle"></i><span>Bantuan</span>
+    </a>
+    <div class="workshop-status">
+      <span class="dot-live"></span>
+      <div>
+        <strong>Workshop Online</strong>
+        <small id="workshopMeta">Database tersinkron</small>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- ══════════════════════════════════════════════════════
+     KONTEN UTAMA
+     ══════════════════════════════════════════════════════ -->
+<main id="mainContent" class="main-content">
+
+  <!-- Header aplikasi (mobile + desktop) -->
+  <header class="app-header">
+    <div class="app-header-left">
+      <div class="avatar logo-plate" id="headerAvatar" role="img" aria-label="Logo PINGBRO"></div>
+      <div class="header-greet">
+        <strong id="headerTitle">Halo, Owner 👋</strong>
+        <small id="headerSub"><i class="bi bi-calendar3"></i> <span id="headerDate">—</span></small>
+      </div>
+    </div>
+    <div class="app-header-right">
+      <button class="icon-btn" onclick="refreshSemua()" title="Muat ulang data">
+        <i class="bi bi-arrow-clockwise"></i>
+      </button>
+      <button class="icon-btn" onclick="navigateTo('notifikasi')" title="Notifikasi">
+        <i class="bi bi-bell"></i>
+        <span class="icon-badge" id="badgeNotif">0</span>
+      </button>
+      <button class="icon-btn" id="themeBtn" onclick="toggleDarkMode()" title="Mode gelap / terang">
+        <i class="bi bi-moon-stars"></i>
+      </button>
+    </div>
+  </header>
+
+  <!-- ────────────── SECTION: DASHBOARD ────────────── -->
+  <section id="section-dashboard" class="content-section active">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-desc">Monitoring order &amp; produksi harian</p>
+      </div>
+      <span class="chip chip-progress" id="dashPeriode">Periode berjalan</span>
+    </div>
+
+    <!-- KPI -->
+    <div class="kpi-grid" id="kpiGrid">
+      <div class="skeleton-card"></div><div class="skeleton-card"></div>
+      <div class="skeleton-card"></div><div class="skeleton-card"></div>
+    </div>
+
+    <!-- Kartu keuangan -->
+    <div id="kartuKeuangan"></div>
+
+    <!-- Order prioritas -->
+    <div class="card-surface mt-3">
+      <div class="card-head">
+        <div>
+          <h2 class="card-title">Order Prioritas &amp; Deadline Mendekat</h2>
+          <p class="card-sub">Pantau pesanan dengan urgensi tertinggi</p>
+        </div>
+        <button class="btn-ghost" onclick="navigateTo('daftar')">Lihat Semua <i class="bi bi-chevron-right"></i></button>
+      </div>
+      <div id="listPrioritas"><div class="empty-state">Memuat…</div></div>
+    </div>
+    <!-- Grafik + insight -->
+    <div class="row g-3 mt-1">
+      <div class="col-12 col-xl-7">
+        <div class="card-surface">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">Tren Omset 6 Bulan Terakhir</h2>
+              <p class="card-sub">Breakdown nilai order per bulan (juta rupiah)</p>
+            </div>
+          </div>
+          <div class="chart-box"><canvas id="chartOmset"></canvas></div>
+          <div class="legend-row" id="legendJenis"></div>
+        </div>
+      </div>
+      <div class="col-12 col-md-6 col-xl-5">
+        <div class="card-surface h-100">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">Status Produksi &amp; Antrean</h2>
+              <p class="card-sub">Distribusi beban workshop</p>
+            </div>
+          </div>
+          <div class="chart-box chart-box-sm"><canvas id="chartStatus"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Panel analisis otomatis -->
+    <div class="insight-card mt-3" id="insightPanel">
+      <h3><i class="bi bi-stars"></i> Analisis Otomatis</h3>
+      <ul id="insightList"><li>Menganalisis data…</li></ul>
+    </div>
+
+  </section>
+
+  <!-- ────────────── SECTION: DAFTAR ORDER ────────────── -->
+  <section id="section-daftar" class="content-section">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">Daftar Order</h1>
+        <p class="page-desc">Kelola status produksi, pembayaran, dan deadline</p>
+      </div>
+      <button class="btn-primary-sm d-none d-lg-inline-flex" onclick="navigateTo('tambah')">
+        <i class="bi bi-plus-lg"></i> Tambah Order
+      </button>
+    </div>
+
+    <div class="search-bar">
+      <i class="bi bi-search"></i>
+      <input type="search" id="cariOrder" placeholder="Cari no. order, project, customer…"
+             oninput="renderDaftarOrder()" autocomplete="off">
+    </div>
+
+    <div class="filter-chips" id="filterJenis">
+      <button class="chip-filter active" data-jenis="Semua" onclick="setFilterJenis(this,'Semua')">Semua</button>
+      <button class="chip-filter" data-jenis="Full Order" onclick="setFilterJenis(this,'Full Order')">Full Order</button>
+      <button class="chip-filter" data-jenis="Sablon" onclick="setFilterJenis(this,'Sablon')">Sablon Saja</button>
+      <button class="chip-filter" data-jenis="Jahit" onclick="setFilterJenis(this,'Jahit')">Jahit Saja</button>
+      <button class="chip-filter" data-jenis="Jahit + Sablon" onclick="setFilterJenis(this,'Jahit + Sablon')">Jahit + Sablon</button>
+    </div>
+
+    <div class="filter-row">
+      <select class="input-sm" id="filterBayar" onchange="renderDaftarOrder()">
+        <option value="">Semua Status Bayar</option>
+        <option value="Belum Bayar">Belum Bayar</option>
+        <option value="DP">DP</option>
+        <option value="Lunas">Lunas</option>
+      </select>
+      <select class="input-sm" id="filterProduksi" onchange="renderDaftarOrder()">
+        <option value="">Semua Proses</option>
+        <option value="Belum Dikerjakan">Belum Dikerjakan</option>
+        <option value="Material">Material</option>
+        <option value="Cutting">Cutting</option>
+        <option value="Jahit">Jahit</option>
+        <option value="Sablon">Sablon</option>
+        <option value="Finishing">Finishing</option>
+        <option value="Kirim">Kirim</option>
+        <option value="Sukses">Sukses</option>
+        <option value="__terlambat">Terlambat</option>
+      </select>
+      <select class="input-sm" id="filterUrutan" onchange="renderDaftarOrder()">
+        <option value="baru">Terbaru</option>
+        <option value="deadline">Deadline Terdekat</option>
+        <option value="nilai">Nilai Tertinggi</option>
+      </select>
+      <button class="btn-ghost" onclick="resetFilterOrder()"><i class="bi bi-x-circle"></i> Reset</button>
+    </div>
+
+    <div class="ringkas-bar" id="ringkasDaftar"></div>
+    <div id="listOrder"><div class="empty-state">Memuat…</div></div>
+
+    <!-- Tombol kembali di dasar halaman (konten panjang) -->
+    <div class="page-back">
+      <button type="button" class="btn-outline btn-block" onclick="kembali()">
+        <i class="bi bi-arrow-left"></i> Kembali
+      </button>
+    </div>
+
+  </section>
+
+  <!-- ────────────── SECTION: TAMBAH ORDER ────────────── -->
+  <section id="section-tambah" class="content-section">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title" id="judulFormOrder">Buat Order Baru</h1>
+        <p class="page-desc" id="subFormOrder">Input customer, item, sablon, dan pembayaran</p>
+      </div>
+      <span class="chip chip-dp" id="stepIndicator">Order Baru</span>
+    </div>
+
+    <!-- Penanda mode ubah; hanya tampil saat mengedit order yang sudah ada -->
+    <div class="edit-banner" id="editBanner" hidden>
+      <span><i class="bi bi-pencil-square"></i> Mengubah order
+        <b id="editNomorOrder">—</b>. Nomor order, SPK, dan invoice tidak berubah.</span>
+      <button type="button" class="btn-outline" onclick="batalEditOrder()">Batal</button>
+    </div>
+
+    <form id="formOrder" onsubmit="simpanOrder(event)" novalidate>
+
+      <!-- 1. Data customer & project -->
+      <div class="card-surface form-block" id="blokCustomer">
+        <div class="block-head">
+          <span class="block-num">1</span>
+          <div>
+            <h2 class="card-title">Data Customer &amp; Project</h2>
+            <p class="card-sub">Identitas pemesan dan komitmen jadwal</p>
+          </div>
+          <span class="chip chip-danger-soft">Wajib</span>
+        </div>
+
+        <div class="seg-control">
+          <button type="button" class="seg-btn active" onclick="setModeCustomer(this,'lama')">Pilih Customer Lama</button>
+          <button type="button" class="seg-btn" onclick="setModeCustomer(this,'baru')">Customer Baru</button>
+        </div>
+
+        <div class="form-grid">
+          <div class="field" id="fieldCustLama">
+            <label>Customer Terdaftar</label>
+            <select id="custExisting" class="input" onchange="pilihCustomerLama()">
+              <option value="">— Pilih customer —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Nama Customer / Instansi <b class="req">*</b></label>
+            <input type="text" id="custNama" class="input" placeholder="PT Sinar Abadi Kreasi" required>
+          </div>
+          <div class="field">
+            <label>No. WhatsApp / Telepon</label>
+            <input type="tel" id="custWa" class="input" placeholder="0812-9090-1234" inputmode="numeric">
+          </div>
+          <div class="field field-full">
+            <label>Nama Project <b class="req">*</b></label>
+            <input type="text" id="orderProject" class="input" placeholder="Kaos Anniversary Perusahaan 10th" required>
+          </div>
+          <div class="field field-full">
+            <label>Jenis Alur Produksi <b class="req">*</b></label>
+            <!-- 4 alur produksi — form di bawah menyesuaikan pilihan ini -->
+            <div class="alur-grid" id="alurProduksi">
+              <button type="button" class="alur-btn active" onclick="setJenisAlur(this,'Full Order')">
+                <i class="bi bi-layers"></i>
+                <b>Full Order</b>
+                <small>Bahan + Jahit + Sablon</small>
+              </button>
+              <button type="button" class="alur-btn" onclick="setJenisAlur(this,'Sablon')">
+                <i class="bi bi-palette"></i>
+                <b>Sablon Saja</b>
+                <small>Kain dari customer</small>
+              </button>
+              <button type="button" class="alur-btn" onclick="setJenisAlur(this,'Jahit')">
+                <i class="bi bi-scissors"></i>
+                <b>Jahit Saja</b>
+                <small>Cut &amp; Sew / CMT</small>
+              </button>
+              <button type="button" class="alur-btn" onclick="setJenisAlur(this,'Jahit + Sablon')">
+                <i class="bi bi-magic"></i>
+                <b>Jahit + Sablon</b>
+                <small>Tanpa pengadaan kain</small>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Bahan material & deadline -->
+      <div class="card-surface form-block" id="blokBahan">
+        <div class="block-head">
+          <span class="block-num">2</span>
+          <div>
+            <h2 class="card-title" id="judulBlokBahan">Bahan Material &amp; Deadline</h2>
+            <p class="card-sub" id="subBlokBahan">Spesifikasi kain dan komitmen jadwal kirim</p>
+          </div>
+        </div>
+        <div class="form-grid">
+          <!-- Grup bahan disembunyikan pada alur "Sablon Saja" -->
+          <div class="field" data-grup="bahan">
+            <label>Bahan / Material</label>
+            <input type="text" id="orderBahan" class="input" list="listBahan" placeholder="Cotton Combed 24s Reaktif">
+            <datalist id="listBahan">
+              <option value="Cotton Combed 20s"></option>
+              <option value="Cotton Combed 24s"></option>
+              <option value="Cotton Combed 30s"></option>
+              <option value="Cotton Fleece 300gsm"></option>
+              <option value="Lacoste CVC (Polo)"></option>
+              <option value="Milano Dryfit"></option>
+              <option value="American Drill"></option>
+              <option value="Kanvas Marsoto"></option>
+              <option value="Bahan dari Customer"></option>
+            </datalist>
+          </div>
+          <div class="field" data-grup="bahan">
+            <label>Warna Kain</label>
+            <input type="text" id="orderWarna" class="input" placeholder="Hitam Jet Black">
+          </div>
+          <div class="field field-full">
+            <label>Tanggal Deadline <b class="req">*</b></label>
+            <input type="date" id="orderDeadline" class="input" required>
+            <small class="hint" id="hintDeadline">Disarankan minimal 7 hari kerja dari sekarang.</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Detail item produk (isi menyesuaikan alur produksi) -->
+      <div class="card-surface form-block" id="blokItem">
+        <div class="block-head">
+          <span class="block-num">3</span>
+          <div>
+            <h2 class="card-title">Detail Item Produk</h2>
+            <p class="card-sub" id="subBlokItem">Kategori → Ukuran → Jumlah → Harga otomatis</p>
+          </div>
+          <span class="chip chip-progress" id="chipJumlahItem">0 kategori</span>
+        </div>
+
+        <!-- Panel A — rincian ukuran & harga per kategori (Full Order, Jahit, Jahit + Sablon) -->
+        <div class="item-panel" id="panelKategori">
+          <div class="item-panel-head">
+            <span class="item-panel-title">RINCIAN UKURAN &amp; HARGA PER KATEGORI</span>
+            <span class="item-panel-total">Total: <b id="itemPanelTotal">0 pcs</b></span>
+          </div>
+          <div class="item-add-row" id="itemAddRow"></div>
+          <div id="itemRows"></div>
+        </div>
+
+        <!-- Panel B — rincian item sablon (Sablon Saja, Jahit + Sablon) -->
+        <div class="item-panel mt-3" id="panelSablon">
+          <div class="item-panel-head">
+            <span class="item-panel-title">RINCIAN ITEM SABLON</span>
+            <span class="item-panel-total">Total: <b id="sablonPanelTotal">0 pcs</b></span>
+          </div>
+          <div class="item-add-row">
+            <button type="button" class="pill-add" onclick="tambahItemSablon()">
+              <i class="bi bi-plus-lg"></i> Tambah Item Sablon
+            </button>
+          </div>
+          <div id="sablonRows"></div>
+        </div>
+
+        <!-- Panel C — rincian screen sablon (Sablon Saja, Jahit + Sablon) -->
+        <div class="item-panel mt-3" id="panelScreen">
+          <div class="item-panel-head">
+            <span class="item-panel-title">RINCIAN SCREEN SABLON</span>
+            <span class="item-panel-total">Total: <b id="screenPanelTotal">0 pcs</b></span>
+          </div>
+          <div class="item-add-row">
+            <button type="button" class="pill-add" onclick="tambahItemScreen()">
+              <i class="bi bi-plus-lg"></i> Tambah Screen
+            </button>
+          </div>
+          <div id="screenRows"></div>
+        </div>
+      </div>
+
+      <!-- 4. Mockup & spesifikasi sablon -->
+      <div class="card-surface form-block" id="blokMockup">
+        <div class="block-head">
+          <span class="block-num">4</span>
+          <div>
+            <h2 class="card-title" id="judulBlokMockup">Mockup &amp; Spesifikasi Sablon</h2>
+            <p class="card-sub" id="subBlokMockup">Desain akan tersimpan di Google Drive dan tampil pada SPK</p>
+          </div>
+        </div>
+
+        <!-- Seluruh bagian sablon disembunyikan pada alur "Jahit Saja" -->
+        <div data-grup="sablon">
+          <!-- Menerima: klik untuk pilih file, drag &amp; drop, dan CTRL+V (paste) -->
+          <div class="upload-zone" id="uploadZone" tabindex="0"
+               onclick="document.getElementById('mockupInput').click()">
+            <input type="file" id="mockupInput" accept="image/*" hidden onchange="pratinjauMockup(this)">
+            <div id="uploadPlaceholder">
+              <i class="bi bi-cloud-arrow-up"></i>
+              <strong>Unggah Mockup Desain</strong>
+              <small>Klik untuk pilih file, seret gambar ke sini,<br>
+                atau tekan <b>Ctrl + V</b> untuk menempel</small>
+              <small class="upload-note">PNG / JPG, maksimal 5 MB</small>
+            </div>
+            <img id="mockupPreview" class="mockup-preview" alt="Pratinjau mockup" hidden>
+          </div>
+          <div id="mockupInfo" class="mockup-info" hidden></div>
+        </div>
+
+        <div class="form-grid mt-3">
+          <div class="field" data-grup="sablon">
+            <label>Posisi Sablon Depan (Dada)</label>
+            <input type="text" id="sablonDepan" class="input" placeholder="A3 (29.7 x 42 cm) — Plastisol Doff">
+          </div>
+          <div class="field" data-grup="sablon">
+            <label>Posisi Sablon Belakang (Punggung)</label>
+            <input type="text" id="sablonBelakang" class="input" placeholder="A4 (21 x 29.7 cm) — 2 Warna Separasi">
+          </div>
+          <div class="field" data-grup="sablon">
+            <label>Jenis Sablon</label>
+            <input type="text" id="orderJenisSablon" class="input" list="listJenisSablon"
+                   placeholder="Waterbase / Plastisol / DTF">
+            <datalist id="listJenisSablon">
+              <option value="Waterbase"></option>
+              <option value="Plastisol"></option>
+              <option value="Plastisol Doff"></option>
+              <option value="DTF"></option>
+              <option value="Polyflex"></option>
+              <option value="Sublimasi"></option>
+              <option value="Rubber"></option>
+              <option value="Discharge"></option>
+              <option value="Bordir Komputer"></option>
+            </datalist>
+          </div>
+          <div class="field">
+            <label>Detail Pekerjaan (untuk SPK)</label>
+            <input type="text" id="detailPekerjaan" class="input" placeholder="Pola + Jahit + Sablon 2 warna">
+          </div>
+          <div class="field field-full">
+            <label>Catatan Khusus Workshop &amp; Finishing</label>
+            <textarea id="catatanProduksi" class="input" rows="3"
+              placeholder="Sablon minta finishing doff halus, packing plastik satuan clip."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Kalkulasi finansial -->
+      <div class="card-surface form-block" id="blokKalkulasi">
+        <div class="block-head">
+          <span class="block-num">5</span>
+          <div>
+            <h2 class="card-title">Kalkulasi Finansial &amp; Pembayaran</h2>
+            <p class="card-sub">Perhitungan real-time dari rincian item</p>
+          </div>
+          <span class="chip chip-progress" id="chipStatusBayar">Belum Bayar</span>
+        </div>
+
+        <div class="calc-rows">
+          <div class="calc-row"><span>Total Kuantitas Produksi</span><b id="calcQty">0 pcs</b></div>
+          <div class="calc-row"><span>Estimasi Biaya Dasar</span><b id="calcSubtotal">Rp 0</b></div>
+          <div class="calc-row calc-total"><span>Total Tagihan Final</span><b id="calcTotal">Rp 0</b></div>
+        </div>
+
+        <div class="form-grid mt-3">
+          <div class="field">
+            <label>Down Payment (DP) Masuk</label>
+            <input type="text" id="orderDp" class="input" inputmode="numeric" placeholder="0"
+                   oninput="formatRibuan(this)">
+            <small class="hint" id="hintDp">Minimal DP yang disarankan: 50%.</small>
+          </div>
+          <div class="field">
+            <label>Metode Pembayaran</label>
+            <select id="metodeBayar" class="input">
+              <option value="Transfer Bank">Transfer Bank</option>
+              <option value="Tunai">Tunai</option>
+              <option value="QRIS">QRIS</option>
+              <option value="E-Wallet">E-Wallet</option>
+            </select>
+          </div>
+          <div class="field field-full">
+            <div class="sisa-box">
+              <span>Sisa Pelunasan Otomatis</span>
+              <b id="calcSisa">Rp 0</b>
+            </div>
+          </div>
+          <div class="field field-full">
+            <label>Catatan Tambahan Order</label>
+            <textarea id="orderCatatan" class="input" rows="2" placeholder="Catatan bebas untuk order ini…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-outline" onclick="resetFormOrder()">
+          <i class="bi bi-arrow-counterclockwise"></i> Reset
+        </button>
+        <button type="submit" class="btn-primary" id="btnSimpanOrder">
+          <i class="bi bi-check2-circle"></i> <span id="labelSimpanOrder">Simpan Order &amp; Terbitkan SPK</span>
+        </button>
+      </div>
+    </form>
+
+    <!-- Tombol kembali di dasar halaman (konten panjang) -->
+    <div class="page-back">
+      <button type="button" class="btn-outline btn-block" onclick="kembali()">
+        <i class="bi bi-arrow-left"></i> Kembali
+      </button>
+    </div>
+
+  </section>
+
+  <!-- ────────────── SECTION: SPK ────────────── -->
+  <section id="section-spk" class="content-section">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">SPK Produksi</h1>
+        <p class="page-desc">Surat Perintah Kerja sablon &amp; konveksi</p>
+      </div>
+      <span class="chip chip-progress" id="chipSpkAktif">0 aktif</span>
+    </div>
+
+    <div class="search-bar">
+      <i class="bi bi-search"></i>
+      <input type="search" id="cariSpk" placeholder="Cari no. SPK, customer, atau project…"
+             oninput="renderSpk()" autocomplete="off">
+    </div>
+
+    <div class="filter-chips" id="filterSpkStatus">
+      <button class="chip-filter active" onclick="setFilterSpk(this,'Semua')">Semua SPK</button>
+      <button class="chip-filter" onclick="setFilterSpk(this,'Belum Dikerjakan')">Belum Dikerjakan</button>
+      <button class="chip-filter" onclick="setFilterSpk(this,'Material')">Material</button>
+      <button class="chip-filter" onclick="setFilterSpk(this,'Cutting')">Cutting</button>
+      <button class="chip-filter" onclick="setFilterSpk(this,'Jahit')">Jahit</button>
+      <button class="chip-filter" onclick="setFilterSpk(this,'Sablon')">Sablon</button>
+      <button class="chip-filter" onclick="setFilterSpk(this,'Finishing')">Finishing</button>
+      <button class="chip-filter" onclick="setFilterSpk(this,'Kirim')">Kirim</button>
+      <button class="chip-filter" onclick="setFilterSpk(this,'Sukses')">Sukses</button>
+      <button class="chip-filter" onclick="setFilterSpk(this,'__terlambat')">Terlambat</button>
+    </div>
+
+    <div id="listSpk"><div class="empty-state">Memuat…</div></div>
+
+    <!-- Tombol kembali di dasar halaman (konten panjang) -->
+    <div class="page-back">
+      <button type="button" class="btn-outline btn-block" onclick="kembali()">
+        <i class="bi bi-arrow-left"></i> Kembali
+      </button>
+    </div>
+
+  </section>
+
+  <!-- ────────────── SECTION: INVOICE ────────────── -->
+  <section id="section-invoice" class="content-section">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">Invoice &amp; Pembayaran</h1>
+        <p class="page-desc">Tagihan, pelunasan, dan pembukuan kas masuk</p>
+      </div>
+    </div>
+
+    <div class="money-grid" id="ringkasKeuangan"></div>
+
+    <div class="search-bar">
+      <i class="bi bi-search"></i>
+      <input type="search" id="cariInvoice" placeholder="Cari no. invoice, nama klien, no. order…"
+             oninput="renderInvoice()" autocomplete="off">
+    </div>
+
+    <div class="filter-chips">
+      <button class="chip-filter active" onclick="setFilterInvoice(this,'Semua')">Semua</button>
+      <button class="chip-filter" onclick="setFilterInvoice(this,'Belum Bayar')">Belum Bayar</button>
+      <button class="chip-filter" onclick="setFilterInvoice(this,'DP')">DP</button>
+      <button class="chip-filter" onclick="setFilterInvoice(this,'Lunas')">Lunas</button>
+    </div>
+
+    <div id="listInvoice"><div class="empty-state">Memuat…</div></div>
+
+    <!-- Tombol kembali di dasar halaman (konten panjang) -->
+    <div class="page-back">
+      <button type="button" class="btn-outline btn-block" onclick="kembali()">
+        <i class="bi bi-arrow-left"></i> Kembali
+      </button>
+    </div>
+
+  </section>
+
+  <!-- ────────────── SECTION: DETAIL ORDER ────────────── -->
+  <section id="section-detail" class="content-section">
+    <button class="btn-ghost mb-2" onclick="kembali()"><i class="bi bi-arrow-left"></i> Kembali</button>
+    <div id="detailOrderBody"><div class="empty-state">Memuat…</div></div>
+
+    <!-- Tombol kembali di dasar halaman (konten panjang) -->
+    <div class="page-back">
+      <button type="button" class="btn-outline btn-block" onclick="kembali()">
+        <i class="bi bi-arrow-left"></i> Kembali
+      </button>
+    </div>
+
+  </section>
+
+  <!-- ────────────── SECTION: NOTIFIKASI ────────────── -->
+  <section id="section-notifikasi" class="content-section">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">Notifikasi</h1>
+        <p class="page-desc">Deadline mendesak dan tagihan yang perlu ditindaklanjuti</p>
+      </div>
+    </div>
+    <div id="listNotifikasi"><div class="empty-state">Memuat…</div></div>
+
+    <!-- Tombol kembali di dasar halaman (konten panjang) -->
+    <div class="page-back">
+      <button type="button" class="btn-outline btn-block" onclick="kembali()">
+        <i class="bi bi-arrow-left"></i> Kembali
+      </button>
+    </div>
+
+  </section>
+
+  <!-- ────────────── SECTION: PENGATURAN ────────────── -->
+  <section id="section-pengaturan" class="content-section">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">Pengaturan Sistem</h1>
+        <p class="page-desc">Identitas usaha, penyimpanan, dan preferensi aplikasi</p>
+      </div>
+    </div>
+
+    <div class="card-surface form-block">
+      <div class="block-head">
+        <span class="block-num"><i class="bi bi-shop"></i></span>
+        <div>
+          <h2 class="card-title">Identitas Usaha</h2>
+          <p class="card-sub">Tampil pada header aplikasi, SPK, dan invoice</p>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>Nama Aplikasi / Usaha</label>
+          <input type="text" id="setAppName" class="input">
+        </div>
+        <div class="field">
+          <label>Nama Owner</label>
+          <input type="text" id="setOwnerName" class="input">
+        </div>
+        <!-- Satu logo untuk seluruh aplikasi: splash, header, PDF SPK, PDF Invoice -->
+        <div class="field field-full">
+          <label>Logo Perusahaan</label>
+          <div class="logo-setting">
+            <div class="logo-preview logo-plate" id="logoPreview" role="img" aria-label="Logo saat ini"></div>
+            <div class="logo-actions">
+              <input type="file" id="logoInput" accept="image/*" hidden onchange="pilihLogoPerusahaan(this)">
+              <button type="button" class="btn-primary" onclick="document.getElementById('logoInput').click()">
+                <i class="bi bi-upload"></i> Unggah Logo
+              </button>
+              <button type="button" class="btn-outline" onclick="hapusLogoPerusahaan()">
+                <i class="bi bi-arrow-counterclockwise"></i> Pakai Logo Bawaan
+              </button>
+              <small class="hint">PNG / JPG. Gambar otomatis dikecilkan, lalu dipakai di
+                Splash Screen, Header, PDF SPK, dan PDF Invoice sekaligus.</small>
+            </div>
+          </div>
+        </div>
+        <div class="field field-full">
+          <label>Alamat Usaha</label>
+          <input type="text" id="setAlamat" class="input">
+        </div>
+        <div class="field">
+          <label>Telepon Usaha</label>
+          <input type="text" id="setTelp" class="input">
+        </div>
+        <div class="field">
+          <label>Instagram</label>
+          <input type="text" id="setInstagram" class="input" placeholder="@pingbro.id">
+        </div>
+        <div class="field">
+          <label>No. Rekening BCA</label>
+          <input type="text" id="setNoRek" class="input" placeholder="1681620198">
+        </div>
+        <div class="field">
+          <label>Atas Nama Rekening</label>
+          <input type="text" id="setAtasNama" class="input" placeholder="I Kadek Agus Aswirantara">
+        </div>
+        <div class="field field-full">
+          <label>Ringkasan Rekening (dipakai pesan WhatsApp)</label>
+          <input type="text" id="setRekening" class="input" placeholder="BCA 1681620198 a.n. …">
+        </div>
+        <div class="field">
+          <label>Minimal DP (%)</label>
+          <input type="number" id="setMinDp" class="input" min="0" max="100">
+        </div>
+        <div class="field">
+          <label>Peringatan Deadline (hari)</label>
+          <input type="number" id="setWarning" class="input" min="1" max="30">
+        </div>
+      </div>
+      <div class="form-actions form-actions-inline">
+        <button class="btn-primary" onclick="simpanPengaturan()"><i class="bi bi-save"></i> Simpan Pengaturan</button>
+      </div>
+    </div>
+
+    <!-- Keamanan: PIN akses aplikasi -->
+    <div class="card-surface form-block">
+      <div class="block-head">
+        <span class="block-num"><i class="bi bi-shield-lock"></i></span>
+        <div>
+          <h2 class="card-title">Keamanan</h2>
+          <p class="card-sub">PIN yang harus dimasukkan sebelum aplikasi dibuka</p>
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="field">
+          <label>PIN Akses Baru</label>
+          <input type="password" id="setPin" class="input" inputmode="numeric"
+                 autocomplete="new-password" placeholder="Biarkan kosong = tidak diubah">
+        </div>
+        <div class="field">
+          <label>Ulangi PIN Baru</label>
+          <input type="password" id="setPin2" class="input" inputmode="numeric"
+                 autocomplete="new-password" placeholder="Ketik ulang PIN yang sama">
+        </div>
+        <div class="field field-full">
+          <small class="hint">
+            Minimal 4 karakter. Setelah PIN diganti, <b>semua perangkat yang sudah login akan
+            diminta memasukkan PIN baru</b> — termasuk perangkat ini.
+          </small>
+        </div>
+      </div>
+      <div class="form-actions form-actions-inline">
+        <button class="btn-primary" onclick="gantiPin()"><i class="bi bi-key"></i> Ganti PIN</button>
+        <button class="btn-outline" onclick="keluarAplikasi()"><i class="bi bi-box-arrow-right"></i> Keluar</button>
+      </div>
+    </div>
+
+    <div class="card-surface form-block">
+      <div class="block-head">
+        <span class="block-num"><i class="bi bi-hdd-stack"></i></span>
+        <div>
+          <h2 class="card-title">Penyimpanan &amp; Database</h2>
+          <p class="card-sub">Akses langsung ke Google Sheets dan folder Drive</p>
+        </div>
+      </div>
+      <div class="link-grid" id="linkSistem">
+        <div class="empty-state">Memuat tautan…</div>
+      </div>
+    </div>
+
+    <div class="card-surface form-block">
+      <div class="block-head">
+        <span class="block-num"><i class="bi bi-people"></i></span>
+        <div>
+          <h2 class="card-title">Peran &amp; Hak Akses</h2>
+          <p class="card-sub">Mode saat ini: Owner tunggal (single-user)</p>
+        </div>
+      </div>
+      <div class="role-note">
+        <p><b>Owner</b> memiliki akses penuh ke seluruh modul. Struktur data sudah menyediakan
+        kolom peran sehingga role <b>Admin</b>, <b>Staff Produksi</b>, <b>Staff Keuangan</b>, dan
+        <b>Customer</b> dapat ditambahkan pada pengembangan lanjutan tanpa migrasi besar.</p>
+        <div class="role-grid">
+          <div class="role-item active"><i class="bi bi-shield-check"></i><b>Owner</b><small>Akses penuh — aktif</small></div>
+          <div class="role-item"><i class="bi bi-person-gear"></i><b>Admin</b><small>Roadmap</small></div>
+          <div class="role-item"><i class="bi bi-tools"></i><b>Staff Produksi</b><small>Roadmap</small></div>
+          <div class="role-item"><i class="bi bi-cash-coin"></i><b>Staff Keuangan</b><small>Roadmap</small></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tombol kembali di dasar halaman (konten panjang) -->
+    <div class="page-back">
+      <button type="button" class="btn-outline btn-block" onclick="kembali()">
+        <i class="bi bi-arrow-left"></i> Kembali
+      </button>
+    </div>
+
+  </section>
+
+  <!-- ────────────── SECTION: BANTUAN ────────────── -->
+  <section id="section-bantuan" class="content-section">
+    <div class="page-head">
+      <div>
+        <h1 class="page-title">Bantuan</h1>
+        <p class="page-desc">Alur kerja aplikasi dari order sampai pelunasan</p>
+      </div>
+    </div>
+
+    <div class="card-surface form-block">
+      <h2 class="card-title mb-3">Alur Kerja Utama</h2>
+      <ol class="flow-list">
+        <li><b>Buat Order</b> — tekan tombol <i class="bi bi-plus-lg"></i> di tengah dock, isi customer, item, dan DP.</li>
+        <li><b>SPK Otomatis Terbit</b> — setiap order langsung menghasilkan nomor SPK untuk workshop.</li>
+        <li><b>Update Status Produksi</b> — ubah SPK: Belum Dikerjakan → Proses → Selesai.</li>
+        <li><b>Pantau Deadline</b> — order lewat tanggal dan belum selesai otomatis ditandai <b>Terlambat</b>.</li>
+        <li><b>Cetak Invoice</b> — PDF invoice tersimpan otomatis ke Google Drive.</li>
+        <li><b>Catat Pelunasan</b> — status pembayaran berubah otomatis: Belum Bayar → DP → Lunas.</li>
+      </ol>
+    </div>
+
+    <div class="card-surface form-block">
+      <h2 class="card-title mb-3">Pertanyaan Umum</h2>
+      <div class="faq"><b>Kenapa PDF tidak muncul?</b>
+        <p>Pastikan <code>setupAppEnvironment()</code> sudah dijalankan dan izin Drive sudah disetujui.</p></div>
+      <div class="faq"><b>Data tidak berubah setelah edit di Spreadsheet?</b>
+        <p>Tekan tombol <i class="bi bi-arrow-clockwise"></i> di header untuk memuat ulang data dari server.</p></div>
+      <div class="faq"><b>Harga tidak terisi otomatis?</b>
+        <p>Lengkapi kombinasi Jenis Produk × Kategori × Ukuran pada menu <b>Master Harga</b>.</p></div>
+    </div>
+
+    <!-- Tombol kembali di dasar halaman (konten panjang) -->
+    <div class="page-back">
+      <button type="button" class="btn-outline btn-block" onclick="kembali()">
+        <i class="bi bi-arrow-left"></i> Kembali
+      </button>
+    </div>
+
+  </section>
+
+</main>
+
+<!-- ══════════════════════════════════════════════════════
+     BOTTOM DOCK (Mobile) — 5 slot + FAB tengah
+     ══════════════════════════════════════════════════════ -->
+<nav class="bottom-dock">
+  <a href="javascript:void(0)" class="dock-item active" data-section="dashboard" onclick="navigateTo('dashboard')">
+    <i class="bi bi-clipboard-data"></i><span>Order</span>
+  </a>
+  <a href="javascript:void(0)" class="dock-item" data-section="daftar" onclick="navigateTo('daftar')">
+    <i class="bi bi-list-ul"></i><span>Daftar</span>
+  </a>
+  <div class="dock-fab-slot">
+    <button class="dock-fab" onclick="navigateTo('tambah')" aria-label="Tambah order baru">
+      <i class="bi bi-plus-lg"></i>
+    </button>
+  </div>
+  <a href="javascript:void(0)" class="dock-item" data-section="spk" onclick="navigateTo('spk')">
+    <i class="bi bi-clipboard-check"></i><span>SPK</span>
+  </a>
+  <a href="javascript:void(0)" class="dock-item" data-section="invoice" onclick="navigateTo('invoice')">
+    <i class="bi bi-receipt"></i><span>Invoice</span>
+  </a>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════
+     MODAL: PRATINJAU DOKUMEN / MOCKUP
+     ══════════════════════════════════════════════════════ -->
+<div class="modal fade" id="previewModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content app-modal">
+      <div class="modal-header">
+        <h5 class="modal-title" id="previewTitle">Pratinjau Dokumen</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body" id="previewBody"></div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" data-bs-dismiss="modal"><i class="bi bi-x-lg"></i> Tutup</button>
+        <a id="previewDownload" href="#" class="btn-outline" target="_blank" rel="noopener">
+          <i class="bi bi-download"></i> Unduh
+        </a>
+        <a id="previewPrint" href="#" class="btn-primary" target="_blank" rel="noopener">
+          <i class="bi bi-printer"></i> Print
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: KONFIRMASI -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content app-modal">
+      <div class="modal-header">
+        <h5 class="modal-title" id="confirmTitle">Konfirmasi</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body"><p id="confirmText" class="mb-0">Yakin?</p></div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn-danger-solid" id="confirmOkBtn">Ya, Lanjutkan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: CATAT PEMBAYARAN -->
+<div class="modal fade" id="bayarModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content app-modal">
+      <div class="modal-header">
+        <h5 class="modal-title">Catat Pembayaran</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div class="bayar-info" id="bayarInfo"></div>
+        <div class="field mt-3">
+          <label>Jumlah Diterima (Rp)</label>
+          <input type="text" id="bayarJumlah" class="input" inputmode="numeric"
+                 placeholder="0" oninput="formatRibuan(this)">
+        </div>
+        <div class="field mt-2">
+          <label>Metode</label>
+          <select id="bayarMetode" class="input">
+            <option>Transfer Bank</option><option>Tunai</option>
+            <option>QRIS</option><option>E-Wallet</option>
+          </select>
+        </div>
+        <div class="field mt-2">
+          <label>Catatan</label>
+          <input type="text" id="bayarCatatan" class="input" placeholder="Pelunasan sebelum packing">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" data-bs-dismiss="modal">Batal</button>
+        <button type="button" class="btn-primary" id="bayarSimpanBtn"><i class="bi bi-check2"></i> Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: PESAN WHATSAPP -->
+<div class="modal fade" id="waModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content app-modal">
+      <div class="modal-header">
+        <h5 class="modal-title">Pesan Tagihan WhatsApp</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <textarea id="waPesan" class="input" rows="12" readonly></textarea>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" onclick="salinPesanWa()"><i class="bi bi-clipboard"></i> Salin</button>
+        <a id="waLink" href="#" target="_blank" rel="noopener" class="btn-primary">
+          <i class="bi bi-whatsapp"></i> Buka WhatsApp
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-wrap">
+  <div id="appToast" class="app-toast" role="status">
+    <i id="toastIcon" class="bi bi-info-circle"></i>
+    <div>
+      <strong id="toastTitle">Notifikasi</strong>
+      <span id="toastBody"></span>
+    </div>
+  </div>
+</div>
+
+<!-- OVERLAY LOADING GLOBAL -->
+<div id="busyOverlay" class="busy-overlay" hidden>
+  <div class="busy-card">
+    <div class="busy-spinner"></div>
+    <p id="busyText">Memproses…</p>
+  </div>
+</div>
+
+<!-- Library -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+
+<!-- ══════════════════════════════════════════════════════
+     SKRIP APLIKASI — urutan ini penting
+     config.js  : alamat backend (WAJIB diisi sebelum deploy)
+     api.js     : lapisan fetch ke Google Apps Script + token
+     app.js     : state, router, utilitas UI, layar PIN
+     pages.js   : Dashboard, Order, Detail, SPK, Invoice, Notifikasi
+     forms.js   : Form Order, Ubah Order, Pengaturan
+     ══════════════════════════════════════════════════════ -->
+<script src="js/config.js"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+<script src="js/pages.js"></script>
+<script src="js/forms.js"></script>
+</body>
+</html>

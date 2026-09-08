@@ -1,0 +1,1153 @@
+/* ══════════════════════════════════════════════════════════
+   PINGBRO KONVEKSI & SABLON — Design System "Precision Workshop"
+   Struktur token: primitif → semantik → komponen
+   ══════════════════════════════════════════════════════════ */
+
+/* ── LAPIS 1: TOKEN PRIMITIF (tidak berubah antar tema) ── */
+:root{
+  /* Palet inti */
+  --teal-500:#0D9488; --teal-600:#0F766E; --teal-400:#14B8A6;
+  --teal-050:#CCFBF1; --teal-700:#00685F;
+  --navy-900:#0F172A; --navy-800:#1E293B; --navy-700:#213145;
+  --slate-500:#64748B; --slate-400:#94A3B8; --slate-300:#CBD5E1;
+  --slate-200:#E2E8F0; --slate-100:#F1F5F9; --slate-050:#F8FAFC;
+
+  /* Semantik status */
+  --st-pending-bg:#F1F5F9;  --st-pending-fg:#475569;
+  --st-progress-bg:#CCFBF1; --st-progress-fg:#0F766E;
+  --st-success-bg:#DCFCE7;  --st-success-fg:#15803D;
+  --st-warning-bg:#FEF3C7;  --st-warning-fg:#B45309;
+  --st-danger-bg:#FEE2E2;   --st-danger-fg:#B91C1C;
+  --st-dp-bg:#E0E7FF;       --st-dp-fg:#4338CA;
+
+  /* Radius */
+  --r-sm:.25rem; --r-base:.5rem; --r-md:.75rem; --r-lg:1rem; --r-xl:1.5rem; --r-full:9999px;
+
+  /* Spasi (basis 4px) */
+  --sp-xs:.25rem; --sp-sm:.5rem; --sp-md:.75rem; --sp-base:1rem;
+  --sp-lg:1.25rem; --sp-xl:1.5rem; --sp-2xl:2rem; --sp-3xl:3rem;
+
+  /* Struktur */
+  --dock-h:4.5rem; --fab-size:3.5rem; --rail-w:18rem;
+
+  /* Font */
+  --font-head:'Plus Jakarta Sans','Segoe UI',system-ui,sans-serif;
+  --font-body:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;
+}
+
+/* ── LOGO RESMI PINGBRO (data URI, rasio asli 1:1 dipertahankan) ── */
+:root{
+  --logo-pingbro:url(data:image/png;base64,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);
+}
+/* Plat putih bundar agar logo hitam tetap terbaca di atas permukaan gelap.
+   Logo TIDAK diubah bentuk/proporsinya — selalu 'contain' & 1:1. */
+.logo-plate{
+  background-image:var(--logo-pingbro);
+  background-repeat:no-repeat;
+  background-position:center;
+  background-size:contain;
+  background-color:#FFFFFF;
+  border-radius:var(--r-full);
+  aspect-ratio:1/1;
+  flex:none;
+}
+
+/* ── LAPIS 2: TOKEN SEMANTIK — TEMA TERANG (default) ── */
+:root,[data-theme="light"]{
+  --bg-canvas:#F8FAFC;
+  --bg-card:#FFFFFF;
+  --bg-subtle:#F1F5F9;
+  --bg-inset:#FFFFFF;
+  --bg-rail:#0F172A;
+  --bg-header:rgba(248,250,252,.88);
+  --border:#E2E8F0;
+  --border-strong:#CBD5E1;
+  --text:#0F172A;
+  --text-muted:#64748B;
+  --text-faint:#94A3B8;
+  --text-invert:#FFFFFF;
+  --accent:#0D9488;
+  --accent-hover:#0F766E;
+  --accent-soft:rgba(13,148,136,.10);
+  --accent-glow:rgba(13,148,136,.15);
+  --rail-text:#94A3B8;
+  --rail-active-bg:#0D9488;
+  --shadow-1:0 1px 3px 0 rgba(15,23,42,.05),0 1px 2px -1px rgba(15,23,42,.03);
+  --shadow-2:0 10px 15px -3px rgba(15,23,42,.08),0 4px 6px -4px rgba(15,23,42,.03);
+  --shadow-dock:0 -4px 12px 0 rgba(15,23,42,.06);
+  --shadow-fab:0 10px 20px -5px rgba(13,148,136,.40);
+}
+
+/* ── TEMA GELAP ── */
+[data-theme="dark"]{
+  --bg-canvas:#080F1C;
+  --bg-card:#0F1B2D;
+  --bg-subtle:#152437;
+  --bg-inset:#0B1524;
+  --bg-rail:#060C17;
+  --bg-header:rgba(8,15,28,.88);
+  --border:#1E3048;
+  --border-strong:#27405E;
+  --text:#E8F1F8;
+  --text-muted:#8CA3BC;
+  --text-faint:#5B7288;
+  --text-invert:#061019;
+  --accent:#2DD4BF;
+  --accent-hover:#5EEAD4;
+  --accent-soft:rgba(45,212,191,.12);
+  --accent-glow:rgba(45,212,191,.20);
+  --rail-text:#7B93AD;
+  --rail-active-bg:#0D9488;
+  --shadow-1:0 1px 3px 0 rgba(0,0,0,.45);
+  --shadow-2:0 12px 24px -8px rgba(0,0,0,.65);
+  --shadow-dock:0 -4px 16px 0 rgba(0,0,0,.5);
+  --shadow-fab:0 10px 22px -5px rgba(45,212,191,.35);
+
+  --st-pending-bg:#1B2A3D;  --st-pending-fg:#9FB3C8;
+  --st-progress-bg:#0C3B37; --st-progress-fg:#5EEAD4;
+  --st-success-bg:#0E3A22;  --st-success-fg:#6EE7A8;
+  --st-warning-bg:#3D2C0B;  --st-warning-fg:#FBBF24;
+  --st-danger-bg:#3D1519;   --st-danger-fg:#FCA5A5;
+  --st-dp-bg:#1E2352;       --st-dp-fg:#A5B4FC;
+}
+
+/* ── RESET & DASAR ── */
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+/* Wajib: atribut hidden harus selalu menang atas display kustom di bawah */
+[hidden]{display:none !important}
+body{
+  font-family:var(--font-body);
+  font-size:14px;line-height:1.5;
+  background:var(--bg-canvas);color:var(--text);
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+body,.card-surface,.input,.chip,.dock-item,.nav-item,
+.kpi-card,.order-card,.app-header,.bottom-dock,.sidebar{
+  transition:background-color .28s ease,color .28s ease,border-color .28s ease;
+}
+h1,h2,h3,h4,strong,b{font-family:var(--font-head)}
+a{color:var(--accent);text-decoration:none}
+button{font-family:inherit}
+::selection{background:var(--accent-glow)}
+.num{font-variant-numeric:tabular-nums}
+
+/* Scrollbar halus */
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:99px;border:3px solid var(--bg-canvas)}
+
+/* ══════════════════════════════════════════════════════════
+   SPLASH SCREEN
+   ══════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════
+   LAYAR PIN — gerbang akses aplikasi
+   ══════════════════════════════════════════════════════════ */
+.login-screen{
+  position:fixed;inset:0;z-index:10000;
+  display:grid;place-items:center;padding:var(--sp-base);overflow:auto;
+  background:radial-gradient(120% 80% at 50% 0%,#123243 0%,#0A1725 45%,#060D18 100%);
+}
+.login-screen::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(rgba(45,212,191,.09) 1px,transparent 1px);
+  background-size:22px 22px;opacity:.55;
+}
+.login-card{
+  position:relative;width:100%;max-width:360px;
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-lg);box-shadow:var(--shadow-3,0 24px 48px rgba(0,0,0,.35));
+  padding:var(--sp-xl) var(--sp-lg);text-align:center;
+}
+.login-logo{
+  width:88px;height:88px;margin:0 auto var(--sp-base);
+  border-radius:var(--r-md);background-size:contain;
+  background-position:center;background-repeat:no-repeat;
+}
+.login-title{
+  font-family:var(--font-head);font-size:20px;font-weight:800;
+  margin:0 0 .25rem;letter-spacing:-.01em;
+}
+.login-sub{font-size:12.5px;color:var(--text-muted);margin:0 0 var(--sp-lg)}
+.login-label{
+  display:block;text-align:left;font-size:11.5px;font-weight:600;
+  color:var(--text-muted);margin-bottom:.35rem;
+}
+.login-input{
+  width:100%;text-align:center;letter-spacing:.4em;
+  font-family:var(--font-head);font-size:20px;font-weight:700;min-height:52px;
+}
+.login-input::placeholder{letter-spacing:.3em;font-weight:600}
+.login-error{
+  margin-top:.7rem;padding:.55rem .8rem;border-radius:var(--r-base);
+  background:var(--st-danger-bg);color:var(--st-danger-fg);
+  font-size:12px;font-weight:600;text-align:left;
+}
+.login-btn{margin-top:var(--sp-base);min-height:48px}
+.login-note{
+  margin:var(--sp-base) 0 0;font-size:11px;line-height:1.6;color:var(--text-faint);
+}
+/* Saat layar PIN aktif, isi aplikasi tidak boleh ikut tergulir */
+body.terkunci{overflow:hidden}
+
+.splash{
+  position:fixed;inset:0;z-index:9999;
+  background:radial-gradient(120% 80% at 50% 0%,#123243 0%,#0A1725 45%,#060D18 100%);
+  color:#E8F1F8;display:flex;flex-direction:column;
+  padding:var(--sp-base);overflow:auto;
+}
+.splash::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(rgba(45,212,191,.09) 1px,transparent 1px);
+  background-size:22px 22px;opacity:.55;
+}
+.splash-topbar{position:relative;display:flex;justify-content:space-between;gap:var(--sp-sm)}
+.splash-pill{
+  display:inline-flex;align-items:center;gap:.45rem;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.10);
+  border-radius:var(--r-full);padding:.45rem .85rem;
+  font-size:10px;font-weight:700;letter-spacing:.08em;color:#9FCFC8;
+}
+.splash-body{
+  position:relative;flex:1;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;
+  max-width:420px;margin:0 auto;width:100%;padding:var(--sp-2xl) 0;
+}
+.splash-logo-frame{
+  display:grid;place-items:center;
+  border:1px solid rgba(255,255,255,.10);border-radius:var(--r-lg);
+  padding:1.4rem;background:rgba(255,255,255,.03);
+  box-shadow:0 0 60px -18px rgba(45,212,191,.55);
+  margin-bottom:var(--sp-xl);
+}
+/* Logo utama pada layar pembuka — tampil apa adanya, 1:1 */
+.splash-logo-mark{width:104px;height:104px}
+.splash-title{font-size:30px;font-weight:800;letter-spacing:-.02em;margin:0 0 .5rem}
+.splash-sub{font-size:13px;color:#8FA9BF;margin:0 0 var(--sp-xl);line-height:1.55}
+.splash-card{
+  width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.09);
+  border-radius:var(--r-md);padding:1rem 1.1rem;margin-bottom:var(--sp-xl);text-align:left;
+}
+.splash-card-head{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;font-weight:600}
+.splash-card-head b{color:#2DD4BF}
+.splash-progress{height:5px;background:rgba(255,255,255,.09);border-radius:99px;margin:.8rem 0 .75rem;overflow:hidden}
+.splash-progress-bar{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#0D9488,#5EEAD4);transition:width .35s ease}
+.splash-card-foot{display:flex;justify-content:space-between;gap:.5rem;font-size:10.5px;color:#8FA9BF}
+.dot-teal,.dot-navy,.dot-live{width:7px;height:7px;border-radius:50%;display:inline-block}
+.dot-teal{background:#2DD4BF}.dot-navy{background:#5B7288}
+.dot-live{background:#34D399;box-shadow:0 0 0 0 rgba(52,211,153,.55);animation:pulse 2s infinite}
+@keyframes pulse{70%{box-shadow:0 0 0 7px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+.spin-slow{display:inline-block;animation:spin 2.4s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.splash-btn{
+  width:100%;border:none;border-radius:var(--r-md);padding:1.05rem 1.4rem;
+  background:linear-gradient(135deg,#0D9488,#00685F);color:#fff;
+  font-family:var(--font-head);font-weight:700;font-size:16px;
+  display:flex;align-items:center;justify-content:center;gap:.6rem;
+  box-shadow:0 14px 30px -12px rgba(13,148,136,.75);cursor:pointer;
+  transition:transform .15s ease,opacity .2s ease;
+}
+.splash-btn:disabled{opacity:.45;cursor:progress}
+.splash-btn:not(:disabled):active{transform:scale(.98)}
+.splash-hint{font-size:11px;color:#6E8AA3;margin:.85rem 0 0}
+.splash-footer{position:relative;text-align:center;font-size:10.5px;color:#5B7288;padding-top:var(--sp-base)}
+.splash-version span{color:#2DD4BF;font-weight:600}
+.splash.hide{opacity:0;visibility:hidden;transition:opacity .45s ease,visibility .45s}
+
+/* ══════════════════════════════════════════════════════════
+   SIDEBAR (desktop rail)
+   ══════════════════════════════════════════════════════════ */
+.sidebar{
+  position:fixed;top:0;left:0;width:var(--rail-w);height:100vh;
+  background:var(--bg-rail);display:none;flex-direction:column;
+  padding:var(--sp-lg) var(--sp-base);z-index:1030;overflow-y:auto;
+}
+.sidebar-brand{display:flex;align-items:center;gap:.7rem;padding:0 .35rem var(--sp-lg)}
+/* Logo resmi pada rail sidebar */
+.brand-mark{
+  width:40px;height:40px;overflow:hidden;flex:none;
+  display:grid;place-items:center;
+}
+.brand-mark img{width:100%;height:100%;object-fit:contain}
+.brand-text{line-height:1.15;min-width:0}
+.brand-text strong{display:block;color:#fff;font-size:15px;letter-spacing:.1em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand-text span{font-size:8px;letter-spacing:.24em;color:#5E7C93}
+.btn-fab-side{
+  width:100%;border:none;border-radius:var(--r-md);padding:.85rem 1rem;
+  background:var(--teal-500);color:#fff;font-weight:700;font-family:var(--font-head);
+  display:flex;align-items:center;justify-content:center;gap:.5rem;font-size:14px;
+  box-shadow:var(--shadow-fab);cursor:pointer;margin-bottom:var(--sp-lg);
+}
+.btn-fab-side:active{transform:scale(.98)}
+.sidebar-nav{display:flex;flex-direction:column;gap:.2rem;flex:1}
+.nav-item{
+  display:flex;align-items:center;gap:.75rem;padding:.75rem .85rem;
+  border-radius:var(--r-md);color:var(--rail-text);font-size:13.5px;font-weight:500;
+  min-height:44px;cursor:pointer;
+}
+.nav-item i{font-size:16px;width:18px;text-align:center;flex:none}
+/* Hanya label menu yang melar — badge angka tidak boleh ikut merebut ruang */
+.nav-item>span:not(.nav-badge){flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav-item:hover{background:rgba(255,255,255,.05);color:#DCE9F2}
+.nav-item.active{background:var(--rail-active-bg);color:#fff;font-weight:600}
+.nav-badge{
+  flex:none;
+  background:rgba(255,255,255,.12);color:#CBD5E1;border-radius:var(--r-full);
+  padding:.1rem .45rem;font-size:10.5px;font-weight:700;min-width:22px;text-align:center;
+}
+.nav-item.active .nav-badge{background:rgba(0,0,0,.22);color:#fff}
+.sidebar-foot{border-top:1px solid rgba(255,255,255,.08);padding-top:var(--sp-sm);margin-top:var(--sp-base)}
+.workshop-status{
+  display:flex;align-items:center;gap:.6rem;margin-top:var(--sp-md);
+  background:rgba(13,148,136,.12);border:1px solid rgba(13,148,136,.25);
+  border-radius:var(--r-md);padding:.7rem .85rem;
+}
+.workshop-status strong{display:block;color:#A7F3D0;font-size:12.5px}
+.workshop-status small{color:#5E8B85;font-size:10.5px}
+
+/* ══════════════════════════════════════════════════════════
+   LAYOUT UTAMA
+   ══════════════════════════════════════════════════════════ */
+.main-content{
+  padding:var(--sp-base) var(--sp-base) calc(var(--dock-h) + 2.5rem);
+  max-width:100%;min-height:100vh;
+}
+.app-header{
+  position:sticky;top:0;z-index:1020;
+  display:flex;align-items:center;justify-content:space-between;gap:var(--sp-sm);
+  padding:.65rem 0 .85rem;margin-bottom:var(--sp-md);
+  background:var(--bg-header);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.app-header-left{display:flex;align-items:center;gap:.7rem;min-width:0}
+/* Logo resmi pada header aplikasi */
+.avatar{
+  width:42px;height:42px;flex:none;overflow:hidden;
+  display:grid;place-items:center;
+  box-shadow:0 0 0 1px var(--border);
+}
+.avatar img{width:100%;height:100%;object-fit:contain}
+.header-greet{min-width:0}
+.header-greet strong{display:block;font-size:16px;letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header-greet small{color:var(--text-muted);font-size:11.5px;display:flex;align-items:center;gap:.3rem}
+.app-header-right{display:flex;gap:.35rem;flex:none}
+.icon-btn{
+  position:relative;width:40px;height:40px;border-radius:var(--r-md);
+  border:1px solid var(--border);background:var(--bg-card);color:var(--text);
+  display:grid;place-items:center;font-size:16px;cursor:pointer;
+}
+.icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+.icon-badge{
+  position:absolute;top:-4px;right:-4px;min-width:17px;height:17px;padding:0 4px;
+  background:#EF4444;color:#fff;border-radius:var(--r-full);
+  font-size:9.5px;font-weight:700;display:grid;place-items:center;
+}
+.icon-badge.hide{display:none}
+
+.content-section{display:none;animation:fadeUp .28s ease}
+.content-section.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-sm);margin-bottom:var(--sp-base)}
+.page-title{font-size:22px;font-weight:800;letter-spacing:-.02em;margin:0}
+.page-desc{font-size:12.5px;color:var(--text-muted);margin:.15rem 0 0}
+
+/* ══════════════════════════════════════════════════════════
+   KARTU & PERMUKAAN
+   ══════════════════════════════════════════════════════════ */
+.card-surface{
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:var(--sp-base);box-shadow:var(--shadow-1);
+}
+.card-surface.p-0{padding:0}
+.card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:var(--sp-sm);margin-bottom:var(--sp-md)}
+.card-title{font-size:15px;font-weight:700;margin:0;letter-spacing:-.01em}
+.card-sub{font-size:11.5px;color:var(--text-muted);margin:.15rem 0 0}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-md)}
+.kpi-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:var(--sp-base);box-shadow:var(--shadow-1);position:relative;overflow:hidden;
+}
+.kpi-card.danger{border-color:rgba(185,28,28,.35)}
+.kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.6rem}
+.kpi-icon{
+  width:34px;height:34px;border-radius:var(--r-base);display:grid;place-items:center;font-size:15px;
+  background:var(--st-progress-bg);color:var(--st-progress-fg);
+}
+.kpi-icon.amber{background:var(--st-warning-bg);color:var(--st-warning-fg)}
+.kpi-icon.red{background:var(--st-danger-bg);color:var(--st-danger-fg)}
+.kpi-icon.slate{background:var(--st-pending-bg);color:var(--st-pending-fg)}
+.kpi-value{font-family:var(--font-head);font-size:28px;font-weight:800;line-height:1.1;letter-spacing:-.02em}
+.kpi-card.danger .kpi-value{color:#DC2626}
+.kpi-label{font-size:11.5px;color:var(--text-muted);margin-top:.15rem}
+
+/* Kartu keuangan (navy hero) */
+.finance-card{
+  background:linear-gradient(150deg,var(--navy-900),#16273F);color:#E8F1F8;
+  border-radius:var(--r-xl);padding:var(--sp-lg);margin-top:var(--sp-md);
+  box-shadow:var(--shadow-2);
+}
+.finance-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:.35rem}
+.finance-head span{font-size:10.5px;letter-spacing:.14em;font-weight:700;color:#7B93AD}
+.finance-value{font-family:var(--font-head);font-size:29px;font-weight:800;letter-spacing:-.02em;margin:.35rem 0 .1rem}
+.finance-note{font-size:11.5px;color:#8FA9BF}
+.finance-sub{
+  display:flex;align-items:center;justify-content:space-between;gap:var(--sp-sm);
+  background:rgba(255,255,255,.06);border-radius:var(--r-md);padding:.8rem .95rem;margin-top:var(--sp-base);
+}
+.finance-sub small{display:block;font-size:10.5px;color:#8FA9BF}
+.finance-sub b{font-family:var(--font-head);font-size:18px;color:#FCA5A5}
+
+/* Chart */
+.chart-box{position:relative;height:230px}
+.chart-box-sm{height:210px}
+.legend-row{display:flex;flex-wrap:wrap;gap:var(--sp-md);margin-top:var(--sp-md);padding-top:var(--sp-md);border-top:1px solid var(--border)}
+.legend-item{display:flex;align-items:center;gap:.4rem;font-size:11.5px;color:var(--text-muted)}
+.legend-dot{width:9px;height:9px;border-radius:50%}
+.legend-item b{font-family:var(--font-head);color:var(--text);font-size:13px}
+
+/* Panel insight */
+.insight-card{
+  background:linear-gradient(140deg,var(--teal-600),var(--teal-700));
+  color:#EAFFFB;border-radius:var(--r-lg);padding:var(--sp-lg);box-shadow:var(--shadow-2);
+}
+.insight-card h3{font-size:14px;font-weight:700;margin:0 0 .8rem;display:flex;align-items:center;gap:.45rem}
+.insight-card ul{margin:0;padding-left:1.1rem}
+.insight-card li{font-size:12.5px;line-height:1.65;margin-bottom:.5rem}
+.insight-card li:last-child{margin-bottom:0}
+.insight-card b{color:#fff}
+
+/* ══════════════════════════════════════════════════════════
+   CHIP & BADGE STATUS
+   ══════════════════════════════════════════════════════════ */
+.chip{
+  display:inline-flex;align-items:center;gap:.3rem;
+  padding:.25rem .6rem;border-radius:var(--r-full);
+  font-size:10.5px;font-weight:700;letter-spacing:.02em;white-space:nowrap;
+  background:var(--st-pending-bg);color:var(--st-pending-fg);
+}
+.chip-pending{background:var(--st-pending-bg);color:var(--st-pending-fg)}
+.chip-progress{background:var(--st-progress-bg);color:var(--st-progress-fg)}
+.chip-success{background:var(--st-success-bg);color:var(--st-success-fg)}
+.chip-warning{background:var(--st-warning-bg);color:var(--st-warning-fg)}
+.chip-danger{background:var(--st-danger-bg);color:var(--st-danger-fg)}
+.chip-danger-soft{background:var(--st-danger-bg);color:var(--st-danger-fg)}
+.chip-dp{background:var(--st-dp-bg);color:var(--st-dp-fg)}
+.chip-navy{background:var(--navy-900);color:#fff}
+[data-theme="dark"] .chip-navy{background:#1E3048;color:#E8F1F8}
+
+/* ══════════════════════════════════════════════════════════
+   PENCARIAN & FILTER
+   ══════════════════════════════════════════════════════════ */
+.search-bar{
+  position:relative;display:flex;align-items:center;
+  background:var(--bg-subtle);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:0 .85rem;margin-bottom:var(--sp-md);height:48px;
+}
+.search-bar i{color:var(--text-faint);font-size:15px}
+.search-bar input{
+  flex:1;border:none;background:transparent;outline:none;
+  padding:.5rem .65rem;font-size:13.5px;color:var(--text);height:100%;
+}
+.search-bar input::placeholder{color:var(--text-faint)}
+.search-bar:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+
+.filter-chips{display:flex;gap:.5rem;overflow-x:auto;padding-bottom:.35rem;margin-bottom:var(--sp-md);scrollbar-width:none}
+.filter-chips::-webkit-scrollbar{display:none}
+.chip-filter{
+  flex:none;border:1px solid var(--border);background:var(--bg-card);
+  color:var(--text-muted);border-radius:var(--r-full);padding:.5rem 1rem;
+  font-size:12.5px;font-weight:600;cursor:pointer;white-space:nowrap;min-height:38px;
+}
+.chip-filter.active{background:var(--navy-900);color:#fff;border-color:var(--navy-900)}
+[data-theme="dark"] .chip-filter.active{background:var(--accent);color:#04211E;border-color:var(--accent)}
+
+.filter-row{display:flex;flex-wrap:wrap;gap:.5rem;margin-bottom:var(--sp-md)}
+.input-sm{
+  flex:1;min-width:140px;height:42px;border-radius:var(--r-base);
+  border:1px solid var(--border);background:var(--bg-card);color:var(--text);
+  padding:0 .7rem;font-size:12.5px;
+}
+.input-sm:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+
+.ringkas-bar{
+  display:flex;gap:var(--sp-sm);background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:.75rem var(--sp-base);margin-bottom:var(--sp-md);
+  overflow-x:auto;scrollbar-width:none;
+}
+.ringkas-bar::-webkit-scrollbar{display:none}
+.ringkas-item{flex:1;min-width:96px;text-align:center}
+.ringkas-item b{display:block;font-family:var(--font-head);font-size:17px;font-weight:800}
+.ringkas-item small{font-size:10.5px;color:var(--text-muted)}
+.ringkas-item.warn b{color:#DC2626}
+.ringkas-item.ok b{color:var(--st-success-fg)}
+
+/* ══════════════════════════════════════════════════════════
+   KARTU ORDER / SPK / INVOICE
+   ══════════════════════════════════════════════════════════ */
+.order-card{
+  background:var(--bg-card);border:1px solid var(--border);border-left:4px solid var(--accent);
+  border-radius:var(--r-lg);padding:var(--sp-base);margin-bottom:var(--sp-md);
+  box-shadow:var(--shadow-1);
+}
+.order-card.late{border-left-color:#DC2626}
+.order-card.done{border-left-color:#16A34A}
+.order-card.pending{border-left-color:var(--slate-400)}
+.oc-top{display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin-bottom:.5rem;flex-wrap:wrap}
+.oc-code{font-family:var(--font-head);font-weight:800;font-size:14.5px;letter-spacing:-.01em}
+.oc-chips{display:flex;gap:.35rem;flex-wrap:wrap}
+/* Hitung mundur deadline — sejajar kanan, tepat di bawah badge Jenis Order & status bayar */
+.oc-deadline{display:flex;justify-content:flex-end;margin:-.15rem 0 .5rem}
+.oc-deadline .chip{padding:.3rem .7rem;font-size:11px}
+.oc-title{font-size:15px;font-weight:700;font-family:var(--font-head);margin:.1rem 0 .2rem;line-height:1.35}
+.oc-cust{display:flex;align-items:center;gap:.35rem;font-size:12px;color:var(--text-muted);margin-bottom:.7rem}
+
+/* Blok identitas order: #KODE ORDER → Nama Project → Customer · WhatsApp
+   dibaca sebagai satu kesatuan, tanpa jarak kosong di antaranya.
+   Badge diletakkan setelahnya agar tidak pernah menyela ketiga baris tersebut. */
+.oc-ident{display:grid;grid-template-columns:1fr;margin-bottom:.7rem}
+.oc-ident .oc-code{line-height:1.3;display:block}
+.oc-ident .oc-title{margin:0 0 .1rem}
+.oc-ident .oc-cust{margin-bottom:0}
+.oc-ident .oc-chips{margin-top:.45rem}
+.oc-ident .oc-chips .chip{padding:.28rem .62rem;font-size:10.5px}
+
+@media (min-width:560px){
+  /* Layar lebar: badge naik ke sisi kanan blok identitas yang sama */
+  .oc-ident{grid-template-columns:minmax(0,1fr) auto;column-gap:.7rem}
+  .oc-ident .oc-code {grid-column:1;grid-row:1}
+  .oc-ident .oc-title{grid-column:1;grid-row:2}
+  .oc-ident .oc-cust {grid-column:1;grid-row:3}
+  .oc-ident .oc-chips{grid-column:2;grid-row:1 / span 3;align-self:start;
+    justify-content:flex-end;margin-top:0;max-width:14rem}
+}
+.oc-spec{
+  background:var(--bg-subtle);border-radius:var(--r-base);padding:.7rem .8rem;margin-bottom:.7rem;
+  display:flex;flex-direction:column;gap:.4rem;font-size:12px;
+}
+.oc-spec-row{display:flex;justify-content:space-between;gap:.6rem}
+.oc-spec-row span:first-child{color:var(--text-muted);display:flex;align-items:center;gap:.35rem;flex:none}
+.oc-spec-row span:last-child{text-align:right;font-weight:600}
+.oc-progress{margin-bottom:.7rem}
+.oc-progress-head{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:.3rem}
+.oc-progress-head b{font-weight:700}
+.progress-track{height:6px;background:var(--bg-subtle);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;border-radius:99px;background:var(--accent);transition:width .4s ease}
+.progress-fill.late{background:#DC2626}
+.progress-fill.done{background:#16A34A}
+.oc-money{
+  display:flex;justify-content:space-between;align-items:flex-end;gap:.6rem;
+  padding-top:.7rem;border-top:1px dashed var(--border);margin-bottom:.7rem;
+}
+.oc-money small{display:block;font-size:10px;letter-spacing:.08em;color:var(--text-muted);font-weight:600}
+.oc-money b{font-family:var(--font-head);font-size:18px;font-weight:800;letter-spacing:-.02em}
+.oc-money .sisa{font-size:12px;color:#DC2626;font-weight:700}
+.oc-money .lunas{font-size:12px;color:var(--st-success-fg);font-weight:700}
+.oc-actions{display:flex;gap:.45rem;flex-wrap:wrap}
+.oc-actions>*{flex:1;min-width:104px}
+/* Pasangan [ Cetak SPK ][ Cetak Invoice ] — selalu sebaris, lebar identik.
+   Di layar sempit pasangan ini mengambil satu baris penuh agar tidak terpisah. */
+.oc-print-pair{display:flex;gap:.45rem;flex:1 1 100%;min-width:100%}
+.oc-print-pair>*{flex:1 1 0;min-width:0}
+
+/* Tombol */
+.btn-primary,.btn-outline,.btn-navy,.btn-ghost,.btn-danger-solid,.btn-primary-sm,.btn-soft{
+  display:inline-flex;align-items:center;justify-content:center;gap:.4rem;
+  border-radius:var(--r-base);font-weight:600;font-size:12.5px;
+  cursor:pointer;min-height:44px;padding:.6rem .9rem;border:1px solid transparent;
+  transition:transform .12s ease,background-color .2s ease;text-align:center;
+}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-hover);color:#fff}
+[data-theme="dark"] .btn-primary{color:#04211E}
+.btn-primary-sm{background:var(--accent);color:#fff;min-height:40px;font-size:12.5px}
+.btn-navy{background:var(--navy-900);color:#fff}
+[data-theme="dark"] .btn-navy{background:#1E3048;color:#E8F1F8}
+.btn-outline{background:var(--bg-card);border-color:var(--border-strong);color:var(--text)}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-soft{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+.btn-danger-solid{background:#DC2626;color:#fff}
+.btn-ghost{
+  background:transparent;border:none;color:var(--accent);
+  font-size:12.5px;font-weight:600;min-height:38px;padding:.4rem .5rem;
+}
+.btn-primary:active,.btn-outline:active,.btn-navy:active,.btn-danger-solid:active{transform:scale(.98)}
+.btn-primary:disabled,.btn-outline:disabled{opacity:.55;cursor:not-allowed}
+.btn-block{width:100%}
+
+.btn-dashed{
+  width:100%;border:1.5px dashed var(--border-strong);background:transparent;
+  color:var(--accent);border-radius:var(--r-md);padding:.9rem;font-size:13px;font-weight:600;
+  cursor:pointer;min-height:48px;
+}
+.btn-dashed:hover{border-color:var(--accent);background:var(--accent-soft)}
+
+/* ══════════════════════════════════════════════════════════
+   FORM
+   ══════════════════════════════════════════════════════════ */
+.form-block{margin-bottom:var(--sp-md)}
+.block-head{display:flex;align-items:flex-start;gap:.7rem;margin-bottom:var(--sp-base);padding-bottom:var(--sp-md);border-bottom:1px solid var(--border)}
+.block-head>div{flex:1;min-width:0}
+.block-num{
+  width:28px;height:28px;border-radius:var(--r-base);flex:none;
+  background:var(--accent-soft);color:var(--accent);
+  display:grid;place-items:center;font-family:var(--font-head);font-weight:800;font-size:13px;
+}
+.form-grid{display:grid;grid-template-columns:1fr;gap:var(--sp-md)}
+.field{display:flex;flex-direction:column;gap:.35rem;min-width:0}
+.field-full{grid-column:1/-1}
+.field label{font-size:11.5px;font-weight:600;color:var(--text-muted);letter-spacing:.01em}
+.req{color:#DC2626}
+.input{
+  width:100%;min-height:48px;border-radius:var(--r-base);
+  border:1px solid var(--border-strong);background:var(--bg-inset);color:var(--text);
+  padding:.7rem .85rem;font-size:13.5px;font-family:var(--font-body);
+}
+textarea.input{min-height:auto;resize:vertical}
+.input::placeholder{color:var(--text-faint)}
+.input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.input:invalid:not(:placeholder-shown){border-color:#DC2626}
+select.input{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--text-muted) 50%),linear-gradient(135deg,var(--text-muted) 50%,transparent 50%);background-position:calc(100% - 18px) 21px,calc(100% - 13px) 21px;background-size:5px 5px;background-repeat:no-repeat;padding-right:2.2rem}
+.hint{font-size:10.5px;color:var(--text-faint)}
+
+.seg-control{display:flex;gap:.35rem;background:var(--bg-subtle);border-radius:var(--r-md);padding:.3rem;margin-bottom:var(--sp-md)}
+.seg-btn{
+  flex:1;border:none;background:transparent;color:var(--text-muted);
+  border-radius:var(--r-base);padding:.6rem .5rem;font-size:12.5px;font-weight:600;
+  cursor:pointer;min-height:40px;
+}
+.seg-btn.active{background:var(--bg-card);color:var(--accent);box-shadow:var(--shadow-1)}
+.seg-3 .seg-btn{font-size:11.5px}
+
+/* ══════════════════════════════════════════════════════════
+   PILIHAN ALUR PRODUKSI (4 kartu)
+   ══════════════════════════════════════════════════════════ */
+.alur-grid{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.alur-btn{
+  display:flex;flex-direction:column;align-items:flex-start;gap:.1rem;
+  border:1.5px solid var(--border-strong);background:var(--bg-card);color:var(--text);
+  border-radius:var(--r-md);padding:.75rem .8rem;cursor:pointer;text-align:left;min-height:76px;
+  transition:border-color .18s ease,background-color .18s ease,transform .12s ease;
+}
+.alur-btn i{font-size:16px;color:var(--text-faint);margin-bottom:.15rem}
+.alur-btn b{font-family:var(--font-head);font-size:13px;font-weight:700;line-height:1.25}
+.alur-btn small{font-size:10.5px;color:var(--text-muted);line-height:1.3}
+.alur-btn:hover{border-color:var(--accent)}
+.alur-btn:active{transform:scale(.985)}
+.alur-btn.active{border-color:var(--accent);background:var(--accent-soft)}
+.alur-btn.active i,.alur-btn.active b{color:var(--accent)}
+
+/* ══════════════════════════════════════════════════════════
+   PANEL DETAIL ITEM PRODUK
+   Struktur mengikuti referensi: judul panel + total, deretan pill
+   tambah kategori, lalu kartu bergaris putus-putus per kategori.
+   ══════════════════════════════════════════════════════════ */
+.item-panel{
+  background:var(--bg-subtle);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:var(--sp-base);
+}
+.item-panel-head{
+  display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+  flex-wrap:wrap;margin-bottom:var(--sp-md);
+}
+.item-panel-title{
+  font-family:var(--font-head);font-size:12px;font-weight:800;
+  letter-spacing:.06em;text-transform:uppercase;color:var(--accent);
+}
+.item-panel-total{font-size:12px;color:var(--text-muted);font-weight:600;white-space:nowrap}
+.item-panel-total b{font-family:var(--font-head);font-size:14px;color:var(--accent);margin-left:.2rem}
+
+/* Deretan pill "+ Cowok / + Cewek / + Anak / + Isi Manual" */
+.item-add-row{display:flex;flex-wrap:wrap;gap:.45rem;margin-bottom:var(--sp-md)}
+.pill-add{
+  flex:none;display:inline-flex;align-items:center;gap:.3rem;
+  border:1px solid var(--border-strong);background:var(--bg-card);color:var(--text);
+  border-radius:var(--r-full);padding:.5rem .95rem;font-size:12.5px;font-weight:600;
+  cursor:pointer;min-height:40px;white-space:nowrap;
+}
+.pill-add:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-soft)}
+.pill-add:active{transform:scale(.97)}
+
+/* Kartu kategori / item */
+.kat-card{
+  border:1.5px dashed var(--border-strong);border-radius:var(--r-md);
+  background:var(--bg-card);padding:var(--sp-base);margin-bottom:var(--sp-md);
+}
+.kat-card:last-child{margin-bottom:0}
+.kat-head{
+  display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+  flex-wrap:wrap;margin-bottom:var(--sp-base);
+}
+.kat-ident{display:flex;align-items:center;gap:.5rem;flex:1 1 auto;min-width:0}
+.kat-name{
+  font-family:var(--font-head);font-size:14px;font-weight:800;
+  letter-spacing:.02em;text-transform:uppercase;white-space:nowrap;
+}
+.kat-name-input{
+  font-family:var(--font-head);font-size:13px;font-weight:700;text-transform:uppercase;
+  border:1px solid var(--border-strong);background:var(--bg-inset);color:var(--text);
+  border-radius:var(--r-base);padding:.45rem .6rem;min-height:38px;max-width:150px;
+}
+.kat-produk{
+  border:1px solid var(--border-strong);background:var(--bg-inset);color:var(--text-muted);
+  border-radius:var(--r-base);padding:.35rem .5rem;font-size:11.5px;font-weight:600;min-height:34px;
+}
+.kat-harga{display:flex;align-items:center;gap:.5rem;flex:none}
+.kat-harga label{
+  font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--text-muted);white-space:nowrap;
+}
+.kat-harga input{
+  width:130px;min-height:40px;border-radius:var(--r-base);
+  border:1px solid var(--border-strong);background:var(--bg-inset);color:var(--text);
+  padding:.5rem .7rem;font-size:13px;font-variant-numeric:tabular-nums;
+}
+.kat-harga input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.btn-hapus-kat{
+  flex:none;border:1px solid var(--border-strong);background:transparent;color:var(--text-muted);
+  border-radius:var(--r-full);padding:.45rem 1.1rem;font-size:12px;font-weight:600;
+  cursor:pointer;min-height:38px;
+}
+.btn-hapus-kat:hover{border-color:#DC2626;color:#DC2626;background:var(--st-danger-bg)}
+
+/* Grid ukuran: label di atas, kolom input angka di bawah */
+.size-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem}
+.size-cell{display:flex;flex-direction:column;gap:.3rem;min-width:0}
+.size-cell label{
+  font-size:11px;font-weight:700;letter-spacing:.04em;text-align:center;color:var(--text-muted);
+}
+.size-cell input{
+  width:100%;min-height:46px;border-radius:var(--r-base);
+  border:1px solid var(--border-strong);background:var(--bg-inset);color:var(--text);
+  padding:.5rem;font-size:14px;text-align:center;font-variant-numeric:tabular-nums;
+}
+.size-cell input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.size-cell input.terisi{border-color:var(--accent);background:var(--accent-soft);font-weight:700}
+
+/* Baris ukuran manual */
+.manual-row{display:flex;gap:.5rem;align-items:flex-end;margin-top:.5rem}
+.manual-row .input{min-height:44px}
+.manual-row .manual-label{flex:1 1 auto;min-width:0}
+.manual-row .manual-qty{flex:0 0 96px}
+.link-add{
+  display:inline-flex;align-items:center;gap:.35rem;background:none;border:none;
+  color:var(--accent);font-size:12.5px;font-weight:700;cursor:pointer;
+  padding:.6rem 0 0;min-height:38px;
+}
+.link-add:hover{text-decoration:underline}
+
+/* Baris khusus sablon (jumlah, warna depan/belakang, harga satuan) */
+.sablon-grid{display:grid;grid-template-columns:1fr;gap:.6rem}
+.sablon-grid .field label{font-size:11px}
+/* Kartu screen hanya punya 2 field — jangan diregangkan ke 4 kolom */
+.kat-card[data-mode="screen"] .sablon-grid{grid-template-columns:1fr}
+
+/* Subtotal per kartu */
+.kat-sub{
+  display:flex;justify-content:space-between;align-items:center;gap:.5rem;
+  margin-top:.8rem;padding-top:.7rem;border-top:1px dashed var(--border);
+  font-size:12px;color:var(--text-muted);
+}
+.kat-sub b{font-family:var(--font-head);font-size:14px;color:var(--text);font-variant-numeric:tabular-nums}
+.kat-sub b .rp{color:var(--accent)}
+
+.item-empty{
+  text-align:center;padding:var(--sp-xl) var(--sp-base);
+  border:1.5px dashed var(--border-strong);border-radius:var(--r-md);
+  color:var(--text-muted);font-size:12.5px;line-height:1.6;
+}
+.item-empty i{font-size:26px;display:block;margin-bottom:.4rem;color:var(--text-faint)}
+
+/* ══════════════════════════════════════════════════════════
+   DETAIL ORDER — rincian item (versi hanya-baca)
+   Memakai kerangka kartu yang sama dengan RINCIAN UKURAN
+   pada halaman Buat Order Baru.
+   ══════════════════════════════════════════════════════════ */
+.kat-card.readonly{border-style:solid;border-color:var(--border);background:var(--bg-subtle)}
+.kat-produk-view{
+  border:1px solid var(--border);background:var(--bg-card);color:var(--text-muted);
+  border-radius:var(--r-base);padding:.3rem .6rem;font-size:11.5px;font-weight:600;
+}
+.kat-harga-view{font-family:var(--font-head);font-size:14px;font-weight:800;color:var(--text)}
+.size-box{
+  width:100%;min-height:46px;border-radius:var(--r-base);
+  border:1px solid var(--border);background:var(--bg-card);
+  display:grid;place-items:center;font-size:14px;font-weight:700;
+  font-variant-numeric:tabular-nums;
+}
+.size-box.kosong{color:var(--text-faint);font-weight:400}
+.size-box.terisi{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.manual-row-view{
+  display:flex;align-items:center;justify-content:space-between;gap:.6rem;
+  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-base);
+  padding:.6rem .8rem;margin-top:.5rem;font-size:12.5px;
+}
+.manual-row-view span{color:var(--text-muted);display:flex;align-items:center;gap:.4rem}
+.manual-row-view b{font-family:var(--font-head);font-size:13px}
+
+/* Mockup pada kartu SPK Produksi — gambar tampil langsung, bukan hanya tombol */
+.spk-mockup{margin-bottom:.7rem}
+.spk-mockup-head{
+  display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+  font-size:11.5px;font-weight:600;color:var(--text-muted);margin-bottom:.4rem;
+}
+.spk-mockup-head span{display:flex;align-items:center;gap:.35rem}
+.spk-mockup-head .btn-ghost{min-height:32px;padding:.25rem .6rem;font-size:11px}
+.spk-mockup .mockup-frame{min-height:140px}
+.spk-mockup .mockup-detail{max-height:300px}
+.spk-mockup .item-empty{margin:0}
+
+/* Penanda gestur "geser dari tepi kiri untuk kembali" */
+.gestur-hint{
+  position:fixed;left:0;top:50%;z-index:1080;pointer-events:none;
+  width:38px;height:38px;border-radius:0 99px 99px 0;
+  display:grid;place-items:center;color:#fff;font-size:17px;
+  background:var(--accent);box-shadow:var(--shadow-2);
+  opacity:0;transform:translateY(-50%) translateX(-14px);
+  transition:opacity .12s linear;
+}
+
+/* Tombol "Kembali" di dasar halaman panjang — agar Owner tidak perlu gulir ke atas */
+.page-back{margin-top:var(--sp-lg);padding-top:var(--sp-base);border-top:1px solid var(--border)}
+.page-back .btn-outline{gap:.5rem}
+
+/* Mockup pada Detail Order */
+.mockup-frame{
+  background:var(--bg-subtle);border:1px solid var(--border);border-radius:var(--r-md);
+  padding:var(--sp-sm);display:grid;place-items:center;min-height:170px;overflow:hidden;
+}
+.mockup-detail{
+  display:block;width:100%;height:auto;max-height:460px;object-fit:contain;
+  border-radius:var(--r-base);background:var(--bg-card);
+}
+
+/* ══════════════════════════════════════════════════════════
+   CHECKLIST TAHAPAN PRODUKSI
+   ══════════════════════════════════════════════════════════ */
+.tahap-wrap{
+  background:var(--bg-subtle);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:var(--sp-base);margin-bottom:var(--sp-md);
+}
+.tahap-head{
+  display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+  font-size:11.5px;font-weight:600;color:var(--text-muted);margin-bottom:.5rem;
+}
+.tahap-head b{font-family:var(--font-head);font-size:13px;color:var(--accent)}
+.tahap-list{display:grid;grid-template-columns:1fr;gap:.5rem}
+.tahap-item{
+  display:flex;align-items:center;gap:.7rem;cursor:pointer;
+  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-base);
+  padding:.7rem .85rem;min-height:48px;user-select:none;
+  transition:border-color .18s ease,background-color .18s ease;
+}
+.tahap-item:hover{border-color:var(--accent)}
+.tahap-item input{position:absolute;opacity:0;width:0;height:0}
+.tahap-box{
+  flex:none;width:22px;height:22px;border-radius:var(--r-sm);
+  border:1.5px solid var(--border-strong);background:var(--bg-inset);
+  display:grid;place-items:center;color:transparent;font-size:13px;
+  transition:background-color .18s ease,border-color .18s ease,color .18s ease;
+}
+.tahap-nama{font-size:13px;font-weight:600}
+.tahap-item.done{border-color:var(--accent);background:var(--accent-soft)}
+.tahap-item.done .tahap-box{background:var(--accent);border-color:var(--accent);color:#fff}
+[data-theme="dark"] .tahap-item.done .tahap-box{color:#04211E}
+.tahap-item.done .tahap-nama{color:var(--accent)}
+.tahap-item input:focus-visible + .tahap-box{box-shadow:0 0 0 3px var(--accent-glow)}
+
+.btn-remove{border:none;background:transparent;color:#DC2626;font-size:15px;cursor:pointer;padding:.35rem .5rem;border-radius:var(--r-sm)}
+.btn-remove:hover{background:var(--st-danger-bg)}
+
+/* Upload */
+.upload-zone{
+  border:1.5px dashed var(--border-strong);border-radius:var(--r-md);
+  padding:var(--sp-xl) var(--sp-base);text-align:center;cursor:pointer;
+  background:var(--bg-subtle);min-height:150px;display:grid;place-items:center;
+}
+.upload-zone:hover,.upload-zone:focus-visible,
+.upload-zone.seret{border-color:var(--accent);background:var(--accent-soft);outline:none}
+.upload-zone.seret{border-width:2px}
+.upload-note{display:block;margin-top:.35rem;color:var(--text-faint)}
+
+/* Kotak isian jenis produk baru pada kartu kategori */
+.produk-baru{display:flex;gap:.45rem;align-items:center;margin-bottom:var(--sp-md)}
+.produk-baru .input{flex:1;min-width:0;min-height:44px}
+.produk-baru .btn-primary{flex:none;min-height:44px;padding:.6rem 1rem}
+.upload-zone i{font-size:30px;color:var(--accent);display:block;margin-bottom:.5rem}
+.upload-zone strong{display:block;font-size:13.5px;margin-bottom:.2rem}
+.upload-zone small{color:var(--text-muted);font-size:11px}
+.mockup-preview{max-width:100%;max-height:260px;border-radius:var(--r-base);object-fit:contain}
+.mockup-info{
+  display:flex;align-items:center;justify-content:space-between;gap:.5rem;
+  background:var(--st-progress-bg);color:var(--st-progress-fg);
+  border-radius:var(--r-base);padding:.6rem .8rem;margin-top:.6rem;font-size:11.5px;font-weight:600;
+}
+
+/* Kalkulasi */
+.calc-rows{background:var(--bg-subtle);border-radius:var(--r-md);padding:var(--sp-base)}
+.calc-row{display:flex;justify-content:space-between;align-items:center;padding:.45rem 0;font-size:13px}
+.calc-row b{font-family:var(--font-head);font-weight:700}
+.calc-total{border-top:1px solid var(--border);margin-top:.35rem;padding-top:.7rem}
+.calc-total b{font-size:20px;color:var(--accent)}
+.sisa-box{
+  display:flex;justify-content:space-between;align-items:center;
+  background:var(--st-danger-bg);color:var(--st-danger-fg);
+  border-radius:var(--r-md);padding:.85rem 1rem;font-size:12.5px;font-weight:600;
+}
+.sisa-box b{font-family:var(--font-head);font-size:18px}
+.sisa-box.lunas{background:var(--st-success-bg);color:var(--st-success-fg)}
+
+.form-actions{
+  display:flex;gap:.6rem;position:sticky;bottom:calc(var(--dock-h) + .5rem);z-index:900;
+  background:var(--bg-header);backdrop-filter:blur(10px);
+  padding:.7rem 0;border-top:1px solid var(--border);
+}
+.form-actions>*{flex:1}
+.form-actions-inline{position:static;background:transparent;border:none;padding:var(--sp-base) 0 0;backdrop-filter:none}
+.form-actions-inline>*{flex:none}
+
+/* ══════════════════════════════════════════════════════════
+   TABEL
+   ══════════════════════════════════════════════════════════ */
+.table-wrap{overflow-x:auto;border-radius:var(--r-lg)}
+.data-table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:560px}
+.data-table thead th{
+  background:var(--bg-subtle);color:var(--text-muted);
+  padding:.8rem var(--sp-base);text-align:left;font-size:10.5px;
+  font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;
+  border-bottom:1px solid var(--border);
+}
+.data-table tbody td{padding:.8rem var(--sp-base);border-bottom:1px solid var(--border);vertical-align:middle}
+.data-table tbody tr:last-child td{border-bottom:none}
+.data-table tbody tr:hover{background:var(--accent-soft)}
+.text-end{text-align:right}
+.empty-cell{text-align:center;color:var(--text-muted);padding:var(--sp-2xl) !important}
+
+/* Keuangan grid */
+.money-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--sp-md);margin-bottom:var(--sp-md)}
+.money-card{
+  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:var(--sp-base);box-shadow:var(--shadow-1);
+}
+.money-card small{display:block;font-size:10.5px;letter-spacing:.08em;color:var(--text-muted);font-weight:700;margin-bottom:.35rem}
+.money-card b{font-family:var(--font-head);font-size:20px;font-weight:800;letter-spacing:-.02em;display:block}
+.money-card.warn b{color:#DC2626}
+.money-card span{font-size:11px;color:var(--text-muted)}
+
+/* Detail order */
+.detail-hero{
+  background:linear-gradient(150deg,var(--navy-900),#16273F);color:#E8F1F8;
+  border-radius:var(--r-xl);padding:var(--sp-lg);margin-bottom:var(--sp-md);
+}
+.detail-hero .code{font-family:var(--font-head);font-size:20px;font-weight:800}
+.detail-hero .title{font-size:15px;margin:.25rem 0 .5rem;color:#CFE0EE}
+.detail-hero .chips{display:flex;gap:.35rem;flex-wrap:wrap}
+.spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.spec-box{background:var(--bg-subtle);border-radius:var(--r-base);padding:.7rem .8rem}
+.spec-box small{display:block;font-size:10px;letter-spacing:.06em;color:var(--text-muted);font-weight:700;text-transform:uppercase;margin-bottom:.2rem}
+.spec-box b{font-size:12.5px;font-weight:600;word-break:break-word}
+.timeline{list-style:none;margin:0;padding:0}
+.timeline li{position:relative;padding:0 0 var(--sp-base) 1.4rem;font-size:12.5px}
+.timeline li::before{content:'';position:absolute;left:0;top:5px;width:9px;height:9px;border-radius:50%;background:var(--accent)}
+.timeline li::after{content:'';position:absolute;left:4px;top:16px;bottom:0;width:1px;background:var(--border)}
+.timeline li:last-child::after{display:none}
+.timeline b{display:block;font-size:13px}
+.timeline small{color:var(--text-muted);font-size:11px}
+
+/* Link & role */
+.link-grid{display:grid;grid-template-columns:1fr;gap:var(--sp-md)}
+.link-item{
+  display:flex;align-items:center;gap:.75rem;background:var(--bg-subtle);
+  border:1px solid var(--border);border-radius:var(--r-md);padding:.85rem 1rem;
+}
+.link-item i{font-size:19px;color:var(--accent)}
+.link-item div{flex:1;min-width:0}
+.link-item b{display:block;font-size:13px}
+.link-item small{font-size:11px;color:var(--text-muted)}
+/* Pengaturan logo perusahaan */
+.logo-setting{display:flex;gap:var(--sp-base);align-items:flex-start;flex-wrap:wrap}
+.logo-preview{
+  width:88px;height:88px;flex:none;
+  border:1px solid var(--border);box-shadow:var(--shadow-1);
+}
+.logo-actions{flex:1;min-width:200px;display:flex;flex-wrap:wrap;gap:.5rem}
+.logo-actions .btn-primary,.logo-actions .btn-outline{flex:1;min-width:150px}
+.logo-actions .hint{flex-basis:100%}
+
+/* Penanda mode ubah order */
+.edit-banner{
+  display:flex;align-items:center;justify-content:space-between;gap:var(--sp-md);
+  flex-wrap:wrap;background:var(--st-warning-bg);color:var(--st-warning-fg);
+  border:1px solid var(--st-warning-fg);border-radius:var(--r-md);
+  padding:.85rem 1rem;margin-bottom:var(--sp-md);font-size:12.5px;
+}
+.edit-banner b{font-family:var(--font-head)}
+.edit-banner .btn-outline{min-height:38px;padding:.4rem .9rem;flex:none}
+
+.role-note p{font-size:12.5px;color:var(--text-muted);line-height:1.6}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:var(--sp-md)}
+.role-item{background:var(--bg-subtle);border:1px solid var(--border);border-radius:var(--r-md);padding:.85rem;text-align:center}
+.role-item i{font-size:18px;color:var(--text-muted);display:block;margin-bottom:.3rem}
+.role-item b{display:block;font-size:12.5px}
+.role-item small{font-size:10.5px;color:var(--text-faint)}
+.role-item.active{border-color:var(--accent);background:var(--accent-soft)}
+.role-item.active i,.role-item.active b{color:var(--accent)}
+
+.flow-list{padding-left:1.1rem;margin:0}
+.flow-list li{font-size:13px;line-height:1.7;margin-bottom:.5rem;color:var(--text-muted)}
+.flow-list b{color:var(--text)}
+.faq{padding:.8rem 0;border-bottom:1px solid var(--border)}
+.faq:last-child{border-bottom:none}
+.faq b{font-size:13px}
+.faq p{font-size:12.5px;color:var(--text-muted);margin:.3rem 0 0}
+code{background:var(--bg-subtle);padding:.1rem .35rem;border-radius:var(--r-sm);font-size:11.5px;color:var(--accent)}
+
+/* Empty & skeleton */
+.empty-state{
+  text-align:center;padding:var(--sp-3xl) var(--sp-base);color:var(--text-muted);font-size:13px;
+}
+.empty-state i{font-size:36px;display:block;margin-bottom:.6rem;color:var(--text-faint)}
+.skeleton-card{height:106px;border-radius:var(--r-lg);background:var(--bg-subtle);animation:shimmer 1.3s infinite}
+@keyframes shimmer{0%,100%{opacity:.55}50%{opacity:1}}
+
+/* ══════════════════════════════════════════════════════════
+   BOTTOM DOCK (mobile)
+   ══════════════════════════════════════════════════════════ */
+.bottom-dock{
+  position:fixed;left:0;right:0;bottom:0;z-index:1040;height:var(--dock-h);
+  background:var(--navy-900);box-shadow:var(--shadow-dock);
+  display:grid;grid-template-columns:repeat(5,1fr);align-items:center;
+  padding-bottom:env(safe-area-inset-bottom);
+}
+[data-theme="dark"] .bottom-dock{background:#060C17;border-top:1px solid #16283C}
+.dock-item{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;
+  color:#6E8AA3;font-size:10px;font-weight:600;height:100%;min-height:44px;position:relative;
+}
+.dock-item i{font-size:19px}
+.dock-item.active{color:#2DD4BF}
+.dock-item.active::after{
+  content:'';position:absolute;bottom:9px;width:5px;height:5px;border-radius:50%;background:#2DD4BF;
+}
+.dock-fab-slot{display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.dock-fab{
+  position:absolute;top:-26px;width:var(--fab-size);height:var(--fab-size);border-radius:var(--r-full);
+  border:4px solid var(--bg-canvas);background:var(--teal-500);color:#fff;font-size:23px;
+  display:grid;place-items:center;cursor:pointer;box-shadow:var(--shadow-fab);
+  transition:transform .15s ease;
+}
+[data-theme="dark"] .dock-fab{border-color:#060C17}
+.dock-fab:active{transform:scale(.94)}
+
+/* ══════════════════════════════════════════════════════════
+   MODAL, TOAST, OVERLAY
+   ══════════════════════════════════════════════════════════ */
+/* Pengaman bila CSS Bootstrap gagal dimuat: modal tetap tersembunyi */
+.modal{display:none}
+.app-modal{
+  background:var(--bg-card);color:var(--text);
+  border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-2);
+}
+.app-modal .modal-header,.app-modal .modal-footer{border-color:var(--border);padding:var(--sp-base)}
+.app-modal .modal-title{font-family:var(--font-head);font-size:15px;font-weight:700}
+.app-modal .modal-body{padding:var(--sp-base)}
+.app-modal .btn-close{filter:var(--close-filter,none)}
+[data-theme="dark"] .app-modal .btn-close{filter:invert(1) grayscale(1) brightness(1.8)}
+#previewBody img{width:100%;border-radius:var(--r-base)}
+#previewBody iframe{width:100%;height:66vh;border:none;border-radius:var(--r-base)}
+.bayar-info{background:var(--bg-subtle);border-radius:var(--r-md);padding:.85rem 1rem;font-size:12.5px}
+.bayar-info div{display:flex;justify-content:space-between;padding:.2rem 0}
+.bayar-info b{font-family:var(--font-head)}
+
+.toast-wrap{position:fixed;left:var(--sp-base);right:var(--sp-base);bottom:calc(var(--dock-h) + 1rem);z-index:1090;pointer-events:none;display:flex;justify-content:center}
+.app-toast{
+  display:none;align-items:flex-start;gap:.65rem;max-width:440px;width:100%;
+  background:var(--navy-900);color:#E8F1F8;border-radius:var(--r-md);
+  padding:.85rem 1rem;box-shadow:var(--shadow-2);border-left:4px solid var(--accent);
+  pointer-events:auto;
+}
+.app-toast.show{display:flex;animation:toastIn .3s ease}
+@keyframes toastIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.app-toast i{font-size:17px;color:var(--accent);margin-top:1px}
+.app-toast strong{display:block;font-size:13px;margin-bottom:.1rem}
+.app-toast span{font-size:12px;color:#B7C9DA;line-height:1.45}
+.app-toast.success{border-left-color:#22C55E}.app-toast.success i{color:#22C55E}
+.app-toast.danger{border-left-color:#EF4444}.app-toast.danger i{color:#EF4444}
+.app-toast.warning{border-left-color:#F59E0B}.app-toast.warning i{color:#F59E0B}
+
+.busy-overlay{position:fixed;inset:0;z-index:1100;background:rgba(15,23,42,.55);backdrop-filter:blur(3px);display:grid;place-items:center}
+.busy-card{background:var(--bg-card);border-radius:var(--r-lg);padding:var(--sp-xl) var(--sp-2xl);text-align:center;box-shadow:var(--shadow-2)}
+.busy-spinner{
+  width:34px;height:34px;margin:0 auto .8rem;border-radius:50%;
+  border:3px solid var(--accent-soft);border-top-color:var(--accent);animation:spin .7s linear infinite;
+}
+.busy-card p{margin:0;font-size:13px;color:var(--text-muted)}
+.spinner-inline{
+  display:inline-block;width:14px;height:14px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin .6s linear infinite;
+}
+
+/* ══════════════════════════════════════════════════════════
+   RESPONSIF — mobile-first, membesar ke atas
+   ══════════════════════════════════════════════════════════ */
+@media (min-width:576px){
+  .form-grid{grid-template-columns:1fr 1fr}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .oc-actions>*{min-width:120px}
+  .tahap-list{grid-template-columns:1fr 1fr}
+  .sablon-grid,
+  .kat-card[data-mode="screen"] .sablon-grid{grid-template-columns:1fr 1fr}
+}
+
+@media (min-width:768px){
+  .main-content{padding:var(--sp-lg) var(--sp-xl) calc(var(--dock-h) + 2.5rem)}
+  .kpi-grid{grid-template-columns:repeat(4,1fr)}
+  .money-grid{grid-template-columns:repeat(4,1fr)}
+  .link-grid{grid-template-columns:1fr 1fr}
+  .role-grid{grid-template-columns:repeat(4,1fr)}
+  .page-title{font-size:25px}
+  .spec-grid{grid-template-columns:repeat(3,1fr)}
+  /* Layar lebih lapang: seluruh ukuran XS–XXXL sejajar satu baris */
+  .size-grid{grid-template-columns:repeat(7,1fr)}
+  .kat-name-input{max-width:190px}
+}
+
+@media (min-width:992px){
+  .sidebar{display:flex}
+  .bottom-dock{display:none}
+  .main-content{margin-left:var(--rail-w);padding:var(--sp-xl) var(--sp-2xl) var(--sp-2xl);max-width:1440px}
+  .form-actions{bottom:0}
+  .toast-wrap{left:auto;right:var(--sp-xl);bottom:var(--sp-xl);width:auto}
+  .app-toast{width:380px}
+  .chart-box{height:280px}
+  .order-card{padding:var(--sp-lg)}
+  /* Kartu lebih lapang: pasangan tombol cetak ikut sebaris dengan tombol lain */
+  .oc-print-pair{flex:2 1 auto;min-width:auto}
+  /* Detail Item Produk pada desktop — manfaatkan ruang horizontal */
+  .alur-grid{grid-template-columns:repeat(4,1fr)}
+  .sablon-grid{grid-template-columns:repeat(4,1fr)}
+  .kat-card[data-mode="screen"] .sablon-grid{grid-template-columns:repeat(2,1fr)}
+  .tahap-list{grid-template-columns:repeat(3,1fr)}
+  .item-panel{padding:var(--sp-lg)}
+  .kat-card{padding:var(--sp-lg)}
+  .kat-harga input{width:160px}
+  .form-grid{gap:var(--sp-base)}
+}
+
+@media (min-width:1280px){
+  .main-content{padding-left:var(--sp-3xl);padding-right:var(--sp-3xl)}
+}
+
+/* Kurangi animasi bila pengguna memintanya */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+}
+
+/* Kelas bantu */
+.mt-1{margin-top:.35rem}.mt-2{margin-top:.7rem}.mt-3{margin-top:1rem}
+.mb-2{margin-bottom:.7rem}.mb-3{margin-bottom:1rem}
+.h-100{height:100%}
+.hidden{display:none !important}
