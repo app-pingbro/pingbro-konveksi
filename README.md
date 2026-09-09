@@ -10,12 +10,14 @@ Aplikasi manajemen order, produksi (SPK), dan keuangan untuk usaha konveksi & sa
 ```
 index.html            Halaman aplikasi (SPA satu halaman)
 .nojekyll             Menonaktifkan pemrosesan Jekyll di GitHub Pages
+og-image.png          Gambar kartu preview saat tautan situs dibagikan
 css/style.css         Seluruh tampilan (design system + dark mode)
 js/config.js          ← SATU-SATUNYA berkas yang wajib Anda edit
 js/api.js             Lapisan fetch ke Apps Script + token sesi
 js/app.js             State, router, utilitas UI, layar PIN
 js/pages.js           Dashboard, Order, Detail, SPK, Invoice, Notifikasi
-js/forms.js           Form Order, Ubah Order, Pengaturan
+js/forms.js           Form Order, Ubah Order, Pengaturan, Data Customer
+js/cetak.js           SPK & Invoice menjadi gambar JPG siap cetak
 ```
 
 ## Cara memasang
@@ -37,3 +39,7 @@ Ringkasnya:
 - `index.html` **harus** berada di root repository, bukan di dalam subfolder.
 - Berkas backend (`Kode.gs`) **tidak** diunggah ke repository ini.
 - Repository wajib **Public** agar GitHub Pages gratis dapat dipakai.
+- SPK & Invoice dibuat sebagai **JPG** langsung di browser — tidak ada berkas PDF
+  yang dibuat maupun disimpan ke Google Drive.
+- `og-image.png` adalah gambar statis. Setelah Logo Perusahaan diganti, buat ulang
+  gambarnya lewat **Pengaturan → Preview Tautan**, timpa berkasnya, lalu `git push`.

@@ -175,6 +175,7 @@ Isinya harus persis begini:
 pingbro-konveksi/
 ├── index.html          ← harus di lapisan paling luar
 ├── .nojekyll
+├── og-image.png        ← gambar preview saat tautan dibagikan
 ├── README.md
 ├── css/
 │   └── style.css
@@ -183,7 +184,8 @@ pingbro-konveksi/
     ├── api.js
     ├── app.js
     ├── pages.js
-    └── forms.js
+    ├── forms.js
+    └── cetak.js
 ```
 
 ## B6. ⚠️ Isi alamat backend — JANGAN DILEWATI
@@ -374,7 +376,10 @@ Buka alamat situs Anda, lalu periksa berurutan:
 | 4 | Buka menu Order, SPK, Invoice | Data contoh dari setup muncul |
 | 5 | Buat order baru | Muncul nomor `ORD-…`, `SPK-…`, `INV-…` sekaligus |
 | 6 | Unggah mockup pada order | Tersimpan, gambar tampil di Detail Order & kartu SPK |
-| 7 | Cetak SPK / Invoice | PDF terbuka di jendela pratinjau, ada tombol Unduh & Print |
+| 7 | Cetak SPK / Invoice | Gambar **JPG** terbuka di jendela pratinjau dengan tombol **Preview · Unduh JPG · Print** |
+| 7b | Perhatikan mockup pada SPK | Mockup mengisi ruang kosong yang tersisa, rasio gambar tidak berubah, seluruh isi tetap 1 halaman |
+| 7c | Pengaturan → Data Customer → Hapus | Muncul konfirmasi; setelah dihapus, customer hilang dari daftar **tetapi order, SPK, invoice, dan pembayarannya tetap ada** |
+| 7d | Bagikan link situs ke WhatsApp | Muncul kartu preview: gambar + "Konveksi & Sablon" + deskripsi |
 | 8 | Centang checklist produksi di SPK | Status di Dashboard ikut berubah seketika |
 | 9 | Catat pembayaran | Status berubah Belum Bayar → DP → Lunas |
 | 10 | Tekan tombol back HP/browser | Kembali ke halaman sebelumnya |
@@ -442,7 +447,11 @@ itu cache browser — tekan **Ctrl+Shift+R**, atau buka di jendela **Incognito**
 | "Sesi berakhir" padahal baru login | PIN diganti di perangkat lain | Masukkan PIN yang baru |
 | PIN lupa | — | Buka spreadsheet **DB_PINGBRO** → sheet **AppConfig** → baris `pinAkses` → lihat/ubah nilainya |
 | Data tidak muncul, log Apps Script kosong | `setupAppEnvironment()` belum dijalankan | Jalankan sekali (langkah A3) |
-| PDF tidak terbuka | Belum login Google di browser yang sama | Login ke akun Google pemilik Drive |
+| Gambar SPK/Invoice lama muncul | Dokumen padat butuh beberapa detik untuk dirender di browser | Tunggu sampai selesai; jangan menekan tombol cetak berkali-kali |
+| Mockup tidak ikut tercetak | Gambar mockup gagal diambil dari Drive | Di tempatnya akan muncul keterangan + tautan Drive; buka mockup lewat Detail Order |
+| Tombol Print tidak membuka apa-apa | Pop-up diblokir browser | Izinkan pop-up untuk situs ini, atau pakai **Unduh JPG** lalu cetak dari galeri |
+| Preview tautan masih memakai logo lama | `og-image.png` belum diperbarui | Pengaturan → Preview Tautan → **Buat Ulang og-image.png**, timpa berkasnya, lalu `git push` |
+| Preview tautan tidak muncul di WhatsApp | WhatsApp menyimpan cache preview per tautan | Coba kirim tautan dengan tambahan `?v=2` di belakangnya, atau tunggu beberapa jam |
 
 ## Perbaikan: situs 404
 
@@ -499,6 +508,65 @@ git mv forms.js  js/forms.js
 git commit -m "Kembalikan struktur folder css/ dan js/"
 git push
 ```
+
+---
+
+# Catatan Teknis
+
+## SPK & Invoice berupa JPG, bukan PDF
+
+Dokumen disusun di backend sebagai HTML, lalu **dirender menjadi gambar JPG di
+browser Anda** pada resolusi 3× (±288 DPI, lebar 2382 piksel) sehingga hurufnya
+tetap tajam saat dicetak.
+
+Akibat yang perlu diketahui:
+
+- **Tidak ada berkas PDF** yang dibuat maupun disimpan ke Google Drive lagi.
+  Folder `PINGBRO/SPK` dan `PINGBRO/Invoice` tidak lagi bertambah isinya.
+- Proses render terjadi di perangkat Anda, jadi kecepatannya mengikuti perangkat —
+  hitungan detik untuk dokumen biasa.
+- Pada SPK, **ukuran mockup dihitung otomatis**: aplikasi mengukur tinggi isi yang
+  sebenarnya, lalu memperbesar mockup sebesar mungkin selama seluruh informasi masih
+  muat dalam satu halaman. Rasio gambar tidak pernah diubah dan mockup tidak pernah
+  melewati margin.
+- Tombol **Print** membuka gambar di tab baru lalu memanggil dialog cetak. Bila
+  pop-up diblokir, pakai **Unduh JPG** lalu cetak dari galeri/berkas.
+
+## Menghapus Customer tanpa kehilangan transaksi
+
+Penghapusan customer memakai cara **arsip**, bukan menghapus baris:
+
+- Baris customer tetap ada di sheet `Customer`, hanya diberi penanda pada kolom
+  `Dihapus`. Karena itu `IDCustomer` pada order lama tidak pernah menunjuk ke data
+  yang hilang.
+- Sheet `Order`, `SPK`, `Invoice`, dan `Pembayaran` **tidak disentuh sama sekali**.
+  Nama dan nomor WhatsApp customer memang sudah tersimpan pada masing-masing baris
+  order, sehingga dokumen lama tetap lengkap.
+- Customer yang dihapus tidak lagi muncul di daftar Pengaturan maupun di pilihan
+  customer saat membuat order.
+- Ingin mengembalikannya? Buka spreadsheet `DB_PINGBRO` → sheet `Customer` →
+  kosongkan kembali sel pada kolom `Dihapus`.
+
+## Preview tautan (Open Graph)
+
+Aplikasi pembaca tautan (WhatsApp, Facebook, Telegram) **tidak menjalankan
+JavaScript**, jadi kartu preview harus berupa data statis di dalam `index.html`
+dan gambar `og-image.png` di folder situs. Karena itu gambar preview tidak bisa
+mengikuti Logo Perusahaan secara otomatis.
+
+Yang bisa dilakukan hanya satu langkah: setelah logo diganti, buka
+**Pengaturan → Preview Tautan → Buat Ulang og-image.png**, timpa berkas
+`og-image.png` di folder proyek, lalu:
+
+```bash
+git add .
+git commit -m "perbarui gambar preview tautan"
+git push
+```
+
+Opsional, untuk kompatibilitas maksimal: di `index.html` ganti dua baris bertanda
+`⤵` menjadi alamat penuh situs Anda, misalnya
+`https://namaanda.github.io/pingbro-konveksi/og-image.png`.
 
 ---
 

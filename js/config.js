@@ -17,7 +17,7 @@ const KONFIG = {
 
   // ── WAJIB DIISI ────────────────────────────────────────
   // Contoh: 'https://script.google.com/macros/s/AKfycbxxxxxxxxxxxx/exec'
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbzdVwctWNeH7jqXf3NplRuAW7XaToCauzVxjpQZ9tv9MzVybHVd5jITHXNh0qGgA7Kp/exec',
+  GAS_URL: 'https://script.google.com/macros/s/AKfycbwsF8XDsYvvoJ7PrL59FuxsKXzZ7fRLQh3iU-LUxFrnAL1NVuNLU2zstjH7oXtFuvea/exec',
 
   // ── Opsional ───────────────────────────────────────────
   // Kunci penyimpanan lokal di browser (ubah bila memasang lebih dari satu aplikasi
@@ -27,7 +27,7 @@ const KONFIG = {
   KUNCI_TEMA  : 'pingbro_theme',
 
   // Batas waktu satu permintaan ke server (milidetik).
-  // Pembuatan PDF bisa memakan waktu, jadi jangan dibuat terlalu pendek.
+  // Penyusunan dokumen cetak bisa memakan waktu, jadi jangan dibuat terlalu pendek.
   TIMEOUT_MS  : 60000
 };
 

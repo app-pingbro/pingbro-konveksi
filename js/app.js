@@ -723,14 +723,22 @@ function bukaPratinjau(judul, sumber, tipe, unduhUrl, printUrl) {
     ? '<img src="' + escapeAttr(sumber) + '" alt="' + escapeAttr(judul) + '">'
     : '<iframe src="' + escapeAttr(sumber) + '" loading="lazy"></iframe>';
 
+  // Kembalikan tombol ke bentuk biasa — js/cetak.js mengubahnya saat mencetak JPG
   const dl = document.getElementById('previewDownload');
   dl.href = unduhUrl || sumber;
+  dl.removeAttribute('download');
+  dl.setAttribute('target', '_blank');
+  dl.innerHTML = '<i class="bi bi-download"></i> Unduh';
 
-  // Tombol Print hanya relevan untuk dokumen PDF
+  const penuh = document.getElementById('previewFull');
+  if (penuh) { penuh.hidden = true; penuh.onclick = null; }
+
   const pr = document.getElementById('previewPrint');
   if (pr) {
-    if (tipe === 'image' || !printUrl) { pr.hidden = true; }
-    else { pr.hidden = false; pr.href = printUrl; }
+    pr.onclick = null;
+    pr.innerHTML = '<i class="bi bi-printer"></i> Print';
+    if (!printUrl) { pr.hidden = true; }
+    else { pr.hidden = false; pr.href = printUrl; pr.setAttribute('target', '_blank'); }
   }
 
   new bootstrap.Modal(document.getElementById('previewModal')).show();

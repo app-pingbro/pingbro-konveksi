@@ -303,7 +303,7 @@ function kartuOrder(o, opsi) {
             '<i class="bi bi-printer"></i> Cetak SPK</button>' : '';
         const btnInv = nomorInv
           ? '<button class="btn-outline" onclick="cetakInvoice(\'' + escapeAttr(nomorInv) + '\')">' +
-            '<i class="bi bi-file-earmark-pdf"></i> Cetak Invoice</button>' : '';
+            '<i class="bi bi-file-earmark-image"></i> Cetak Invoice</button>' : '';
         if (btnSpk && btnInv) return '<div class="oc-print-pair">' + btnSpk + btnInv + '</div>';
         return btnSpk + btnInv;
       })() +
@@ -419,7 +419,7 @@ function htmlDetailOrder(d) {
           ? '<button class="btn-primary" onclick="bukaModalBayar(\'' + escapeAttr(o.NomorOrder) + '\',' +
             o.SisaPembayaran + ')"><i class="bi bi-cash-coin"></i> Catat Pembayaran</button>' : '') +
         (inv ? '<button class="btn-outline" onclick="cetakInvoice(\'' + escapeAttr(inv.NomorInvoice) + '\')">' +
-          '<i class="bi bi-file-earmark-pdf"></i> Cetak Invoice</button>' : '') +
+          '<i class="bi bi-file-earmark-image"></i> Cetak Invoice</button>' : '') +
         '<button class="btn-soft" onclick="bukaPesanWa(\'' + escapeAttr(o.NomorOrder) + '\')">' +
           '<i class="bi bi-whatsapp"></i> Kirim Tagihan</button>' +
       '</div>' +
@@ -438,7 +438,7 @@ function htmlDetailOrder(d) {
 
       '<div class="oc-actions mt-2">' +
         '<button class="btn-navy" onclick="cetakSpk(\'' + escapeAttr(spk.NomorSPK) + '\')">' +
-          '<i class="bi bi-printer"></i> Cetak PDF SPK</button></div>' +
+          '<i class="bi bi-printer"></i> Cetak SPK</button></div>' +
     '</div>' : '') +
 
     '<div class="oc-actions mb-3">' +
@@ -881,24 +881,13 @@ function kartuSpk(s) {
 
     '<div class="oc-actions">' +
       '<button class="btn-navy" onclick="cetakSpk(\'' + escapeAttr(s.NomorSPK) + '\')">' +
-        '<i class="bi bi-printer"></i> Cetak PDF</button>' +
+        '<i class="bi bi-printer"></i> Cetak SPK</button>' +
       '<button class="btn-outline" onclick="bukaDetail(\'' + escapeAttr(s.NomorOrder) + '\')">' +
         '<i class="bi bi-eye"></i> Detail Order</button>' +
     '</div></div>';
 }
 
-function cetakSpk(nomorSPK) {
-  busy(true, 'Menyiapkan PDF SPK…');
-  apiCall('generateSpkPdf', { nomorSPK: nomorSPK })
-    .then(function (res) {
-      busy(false);
-      if (res && res.success) {
-        bukaPratinjau(nomorSPK, res.data.previewUrl, 'pdf', res.data.downloadUrl, res.data.printUrl);
-        toast('PDF siap', res.message, 'success');
-      } else toast('Gagal', res ? res.message : 'Tidak ada respons.', 'danger');
-    })
-    .catch(function (err) { busy(false); toast('Error', pesanError(err), 'danger'); });
-}
+// cetakSpk() dipindah ke js/cetak.js — dokumen sekarang dibuat sebagai JPG.
 
 // ══════════════════════════════════════════════════════════
 // BAGIAN 10: INVOICE & PEMBAYARAN
@@ -996,24 +985,13 @@ function kartuInvoice(r) {
       (r.sisa > 0 ? '<button class="btn-primary" onclick="bukaModalBayar(\'' +
         escapeAttr(inv.NomorOrder) + '\',' + r.sisa + ')"><i class="bi bi-cash-coin"></i> Catat Bayar</button>' : '') +
       '<button class="btn-navy" onclick="cetakInvoice(\'' + escapeAttr(inv.NomorInvoice) + '\')">' +
-        '<i class="bi bi-file-earmark-pdf"></i> Cetak PDF</button>' +
+        '<i class="bi bi-file-earmark-image"></i> Cetak Invoice</button>' +
       '<button class="btn-soft" onclick="bukaPesanWa(\'' + escapeAttr(inv.NomorOrder) + '\')">' +
         '<i class="bi bi-whatsapp"></i> Kirim WA</button>' +
     '</div></div>';
 }
 
-function cetakInvoice(nomorInvoice) {
-  busy(true, 'Menyiapkan PDF Invoice…');
-  apiCall('generateInvoicePdf', { nomorInvoice: nomorInvoice })
-    .then(function (res) {
-      busy(false);
-      if (res && res.success) {
-        bukaPratinjau(nomorInvoice, res.data.previewUrl, 'pdf', res.data.downloadUrl, res.data.printUrl);
-        toast('PDF siap', res.message, 'success');
-      } else toast('Gagal', res ? res.message : 'Tidak ada respons.', 'danger');
-    })
-    .catch(function (err) { busy(false); toast('Error', pesanError(err), 'danger'); });
-}
+// cetakInvoice() dipindah ke js/cetak.js — dokumen sekarang dibuat sebagai JPG.
 
 /** Modal catat pembayaran. */
 function bukaModalBayar(nomorOrder, sisa) {

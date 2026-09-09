@@ -1013,6 +1013,198 @@ function isiFormPengaturan() {
   // PIN tidak pernah dikirim server ke browser — kolomnya selalu dikosongkan
   set('setPin',  '');
   set('setPin2', '');
+
+  renderDaftarCustomer();
+  segarkanPratinjauOg();
+}
+
+// ══════════════════════════════════════════════════════════
+// BAGIAN 13B: DATA CUSTOMER
+// ══════════════════════════════════════════════════════════
+
+/** Daftar customer aktif beserta jumlah order dan tombol Hapus. */
+function renderDaftarCustomer() {
+  const box = document.getElementById('listCustomer');
+  if (!box) return;
+
+  const kata = ((document.getElementById('cariCustomer') || {}).value || '')
+    .toLowerCase().trim();
+
+  const data = (AppState.customers || []).filter(function (c) {
+    if (!kata) return true;
+    return [c.NamaCustomer, c.WhatsApp, c.Alamat].join(' ').toLowerCase().indexOf(kata) !== -1;
+  });
+
+  if (!data.length) {
+    box.innerHTML = '<div class="empty-state"><i class="bi bi-person-x"></i>' +
+      (kata ? 'Tidak ada customer yang cocok.' : 'Belum ada data customer.') + '</div>';
+    return;
+  }
+
+  box.innerHTML = data.map(function (c) {
+    const jumlah = (AppState.orders || []).filter(function (o) {
+      return o.IDCustomer === c.ID;
+    }).length;
+
+    return '<div class="cust-row">' +
+      '<div class="cust-info">' +
+        '<b>' + escapeHtml(c.NamaCustomer || '-') + '</b>' +
+        '<span>' +
+          (c.WhatsApp ? '<i class="bi bi-whatsapp"></i> ' + escapeHtml(c.WhatsApp) : 'Tanpa nomor WhatsApp') +
+          (jumlah ? ' &nbsp;·&nbsp; ' + jumlah + ' order' : '') +
+        '</span>' +
+      '</div>' +
+      '<button type="button" class="btn-remove" title="Hapus customer" ' +
+        'onclick="hapusCustomer(\'' + escapeAttr(c.ID) + '\',\'' + escapeAttr(c.NamaCustomer || '') + '\',' + jumlah + ')">' +
+        '<i class="bi bi-trash"></i></button>' +
+    '</div>';
+  }).join('');
+}
+
+/**
+ * Hapus customer dari daftar.
+ * Order, SPK, invoice, dan pembayaran TIDAK ikut terhapus — pesan konfirmasi
+ * menyebutkan hal itu supaya Owner tahu apa yang sebenarnya terjadi.
+ */
+function hapusCustomer(id, nama, jumlahOrder) {
+  const pesan = 'Customer "' + nama + '" akan dikeluarkan dari daftar pilihan customer.\n\n' +
+    (jumlahOrder > 0
+      ? jumlahOrder + ' order beserta SPK, invoice, dan riwayat pembayarannya TETAP TERSIMPAN ' +
+        'dan tidak berubah sedikit pun.'
+      : 'Customer ini belum punya order.') +
+    '\n\nLanjutkan?';
+
+  konfirmasi('Hapus Customer', pesan, function () {
+    busy(true, 'Menghapus customer…');
+    apiCall('deleteCustomer', { id: id })
+      .then(function (res) {
+        busy(false);
+        if (!res || !res.success) {
+          toast('Gagal', res ? res.message : 'Tidak ada respons.', 'danger');
+          return;
+        }
+        // Hilangkan dari daftar lokal agar tampilan langsung berubah
+        AppState.customers = (AppState.customers || []).filter(function (c) { return c.ID !== id; });
+        simpanCacheLokal();
+        renderDaftarCustomer();
+        isiPilihanCustomer();      // dropdown pada form order ikut diperbarui
+        toast('Customer dihapus', res.message, 'success');
+      })
+      .catch(function (err) { busy(false); toast('Error', pesanError(err), 'danger'); });
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// BAGIAN 13C: GAMBAR PREVIEW TAUTAN (og-image.png)
+// ══════════════════════════════════════════════════════════
+
+const OG = { LEBAR: 1200, TINGGI: 630 };
+
+/** Tampilkan pratinjau kecil kartu tautan di halaman Pengaturan. */
+function segarkanPratinjauOg() {
+  const kotak = document.getElementById('ogPratinjau');
+  if (!kotak) return;
+  gambarKartuOg().then(function (dataUri) {
+    kotak.style.backgroundImage = 'url(' + dataUri + ')';
+  }).catch(function () { /* pratinjau opsional */ });
+}
+
+/**
+ * Buat ulang og-image.png dari Logo Perusahaan yang sedang dipakai,
+ * lalu unduh supaya Owner bisa menimpa berkas di folder proyek.
+ */
+function buatGambarPreview() {
+  busy(true, 'Membuat gambar preview…');
+  gambarKartuOg()
+    .then(function (dataUri) {
+      busy(false);
+      const a = document.createElement('a');
+      a.href = dataUri;
+      a.download = 'og-image.png';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      toast('og-image.png terunduh',
+        'Timpa berkas og-image.png di folder proyek, lalu jalankan git add . / commit / push.',
+        'success');
+    })
+    .catch(function (err) {
+      busy(false);
+      toast('Gagal', pesanError(err), 'danger');
+    });
+}
+
+/**
+ * Gambar kartu preview 1200×630 di atas canvas.
+ * Logonya diambil dari variabel CSS --logo-pingbro, jadi otomatis
+ * mengikuti Logo Perusahaan yang terakhir diunggah.
+ */
+function gambarKartuOg() {
+  return new Promise(function (resolve, reject) {
+    const c = document.createElement('canvas');
+    c.width = OG.LEBAR; c.height = OG.TINGGI;
+    const x = c.getContext('2d');
+
+    // Latar bergradasi seperti splash screen
+    const grad = x.createLinearGradient(0, 0, 0, OG.TINGGI);
+    grad.addColorStop(0, '#123243');
+    grad.addColorStop(0.45, '#0A1725');
+    grad.addColorStop(1, '#060D18');
+    x.fillStyle = grad;
+    x.fillRect(0, 0, OG.LEBAR, OG.TINGGI);
+
+    // Pola titik halus
+    x.fillStyle = 'rgba(45,212,191,.20)';
+    for (let py = 0; py < OG.TINGGI; py += 22)
+      for (let px = 0; px < OG.LEBAR; px += 22) x.fillRect(px, py, 1.5, 1.5);
+
+    const tulis = function () {
+      const X = 90 + 260 + 60;
+      x.textBaseline = 'top';
+      x.fillStyle = '#2DD4BF';
+      x.font = 'bold 44px "Plus Jakarta Sans", Inter, Arial, sans-serif';
+      x.fillText('PING BRO', X, 214);
+
+      x.fillStyle = '#FFFFFF';
+      x.font = 'bold 66px "Plus Jakarta Sans", Inter, Arial, sans-serif';
+      x.fillText('Konveksi & Sablon', X, 268);
+
+      x.fillStyle = '#CBD5E1';
+      x.font = '30px Inter, Arial, sans-serif';
+      x.fillText('Aplikasi Manajemen Operasional,', X, 356);
+      x.fillText('Produksi & Keuangan', X, 396);
+
+      x.fillStyle = '#0D9488';
+      x.fillRect(X, 452, 96, 6);
+
+      resolve(c.toDataURL('image/png'));
+    };
+
+    // Logo di atas plat putih bulat
+    const sisi = 260, kiri = 90, atas = (OG.TINGGI - sisi) / 2;
+    x.save();
+    x.fillStyle = '#FFFFFF';
+    x.beginPath();
+    x.arc(kiri + sisi / 2, atas + sisi / 2, sisi / 2, 0, Math.PI * 2);
+    x.fill();
+    x.restore();
+
+    const sumber = (getComputedStyle(document.documentElement)
+      .getPropertyValue('--logo-pingbro').trim().match(/url\(\s*['"]?(.+?)['"]?\s*\)/) || [])[1];
+
+    if (!sumber) { tulis(); return; }
+
+    const img = new Image();
+    img.onload = function () {
+      const muat = sisi - 34;
+      const skala = Math.min(muat / img.width, muat / img.height);
+      const w = img.width * skala, h = img.height * skala;
+      x.drawImage(img, kiri + (sisi - w) / 2, atas + (sisi - h) / 2, w, h);
+      tulis();
+    };
+    img.onerror = function () { tulis(); };   // tanpa logo pun kartunya tetap jadi
+    img.src = sumber;
+  });
 }
 
 /**
@@ -1085,7 +1277,7 @@ function simpanPengaturan() {
 
 /**
  * Owner memilih berkas logo. Gambar dikecilkan di browser lebih dulu supaya
- * muat disimpan di Spreadsheet dan ringan dipakai di PDF.
+ * muat disimpan di Spreadsheet dan ringan dipakai di dokumen cetak.
  */
 function pilihLogoPerusahaan(input) {
   const file = input.files && input.files[0];
@@ -1140,6 +1332,7 @@ function kirimLogo(dataUri, pesanSukses) {
       AppState.config.logoUrl = '';
       simpanCacheLokal();
       terapkanKonfigurasi();
+      segarkanPratinjauOg();     // kartu preview tautan ikut logo terbaru
       toast('Berhasil', pesanSukses, 'success');
     })
     .catch(function (err) { busy(false); toast('Error', pesanError(err), 'danger'); });
@@ -1166,7 +1359,7 @@ function muatLinkSistem() {
           '<small>Buka DB_PINGBRO di tab baru</small></div><i class="bi bi-box-arrow-up-right"></i></a>' +
         '<a class="link-item" href="' + escapeAttr(res.data.folderUrl) + '" target="_blank" rel="noopener">' +
           '<i class="bi bi-folder2-open"></i><div><b>Folder Google Drive</b>' +
-          '<small>Mockup, PDF SPK, dan PDF Invoice</small></div><i class="bi bi-box-arrow-up-right"></i></a>';
+          '<small>Mockup desain dan berkas order</small></div><i class="bi bi-box-arrow-up-right"></i></a>';
     })
     .catch(function () {
       box.innerHTML = '<div class="empty-state">Gagal memuat tautan sistem.</div>';

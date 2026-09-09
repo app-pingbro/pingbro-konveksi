@@ -13,9 +13,44 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#0F172A">
   <title>Konveksi &amp; Sablon</title>
+  <meta name="description" content="Aplikasi Manajemen Operasional, Produksi &amp; Keuangan">
+
   <!-- Favicon diisi dari Logo Perusahaan saat aplikasi dimuat -->
   <link id="faviconApp" rel="icon" href="">
   <link id="faviconApple" rel="apple-touch-icon" href="">
+
+  <!-- ══════════════════════════════════════════════════════
+       KARTU PREVIEW SAAT TAUTAN DIBAGIKAN (Open Graph)
+       Dipakai WhatsApp, Telegram, Facebook, LinkedIn, dll.
+
+       Gambarnya adalah berkas og-image.png di folder yang sama.
+       Aplikasi pembaca tautan tidak menjalankan JavaScript, jadi
+       nilai di bawah HARUS berupa teks statis — bukan diisi dari
+       Pengaturan. Setelah Logo Perusahaan diganti, buat ulang
+       og-image.png lewat Pengaturan → Preview Tautan.
+
+       OPSIONAL (kompatibilitas maksimal): ganti kedua baris
+       bertanda ⤵ menjadi alamat penuh situs Anda, contoh
+       https://namaanda.github.io/pingbro-konveksi/
+       ══════════════════════════════════════════════════════ -->
+  <meta property="og:site_name"   content="PING BRO Konveksi &amp; Sablon">
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="Konveksi &amp; Sablon">
+  <meta property="og:description" content="Aplikasi Manajemen Operasional, Produksi &amp; Keuangan">
+  <meta property="og:image"       content="og-image.png">          <!-- ⤵ -->
+  <meta property="og:image:type"  content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt"   content="Logo PING BRO Konveksi &amp; Sablon">
+  <meta property="og:url"         content="./">                    <!-- ⤵ -->
+  <meta property="og:locale"      content="id_ID">
+
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:title"       content="Konveksi &amp; Sablon">
+  <meta name="twitter:description" content="Aplikasi Manajemen Operasional, Produksi &amp; Keuangan">
+  <meta name="twitter:image"       content="og-image.png">
+
+  <link rel="canonical" href="./">
 
   <!-- Bootstrap 5 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -748,7 +783,7 @@
           <label>Nama Owner</label>
           <input type="text" id="setOwnerName" class="input">
         </div>
-        <!-- Satu logo untuk seluruh aplikasi: splash, header, PDF SPK, PDF Invoice -->
+        <!-- Satu logo untuk seluruh aplikasi: splash, header, SPK, Invoice -->
         <div class="field field-full">
           <label>Logo Perusahaan</label>
           <div class="logo-setting">
@@ -762,7 +797,7 @@
                 <i class="bi bi-arrow-counterclockwise"></i> Pakai Logo Bawaan
               </button>
               <small class="hint">PNG / JPG. Gambar otomatis dikecilkan, lalu dipakai di
-                Splash Screen, Header, PDF SPK, dan PDF Invoice sekaligus.</small>
+                Splash Screen, Header, cetakan SPK, dan cetakan Invoice sekaligus.</small>
             </div>
           </div>
         </div>
@@ -804,6 +839,30 @@
       </div>
     </div>
 
+    <!-- Data Customer: daftar + hapus (arsip, transaksi tetap aman) -->
+    <div class="card-surface form-block">
+      <div class="block-head">
+        <span class="block-num"><i class="bi bi-people"></i></span>
+        <div>
+          <h2 class="card-title">Data Customer</h2>
+          <p class="card-sub">Daftar customer yang muncul saat membuat order</p>
+        </div>
+      </div>
+
+      <div class="field">
+        <input type="text" id="cariCustomer" class="input" placeholder="Cari nama atau nomor WhatsApp…"
+               oninput="renderDaftarCustomer()">
+      </div>
+
+      <div id="listCustomer"><div class="empty-state">Memuat…</div></div>
+
+      <small class="hint">
+        Menghapus customer hanya mengeluarkannya dari daftar pilihan.
+        <b>Order, SPK, invoice, dan pembayaran yang sudah pernah dibuat tetap tersimpan utuh</b>
+        beserta nama dan nomor WhatsApp customer pada dokumennya.
+      </small>
+    </div>
+
     <!-- Keamanan: PIN akses aplikasi -->
     <div class="card-surface form-block">
       <div class="block-head">
@@ -835,6 +894,39 @@
         <button class="btn-primary" onclick="gantiPin()"><i class="bi bi-key"></i> Ganti PIN</button>
         <button class="btn-outline" onclick="keluarAplikasi()"><i class="bi bi-box-arrow-right"></i> Keluar</button>
       </div>
+    </div>
+
+    <!-- Preview link: gambar kartu yang muncul saat tautan situs dibagikan -->
+    <div class="card-surface form-block">
+      <div class="block-head">
+        <span class="block-num"><i class="bi bi-share"></i></span>
+        <div>
+          <h2 class="card-title">Preview Tautan</h2>
+          <p class="card-sub">Kartu yang muncul saat link situs dibagikan ke WhatsApp, Telegram, atau Facebook</p>
+        </div>
+      </div>
+
+      <div class="og-preview">
+        <div class="og-gambar" id="ogPratinjau" role="img" aria-label="Gambar preview tautan"></div>
+        <div class="og-teks">
+          <b>Konveksi &amp; Sablon</b>
+          <span>Aplikasi Manajemen Operasional, Produksi &amp; Keuangan</span>
+        </div>
+      </div>
+
+      <div class="form-actions form-actions-inline">
+        <button class="btn-primary" onclick="buatGambarPreview()">
+          <i class="bi bi-image"></i> Buat Ulang og-image.png
+        </button>
+      </div>
+
+      <small class="hint">
+        Gambar preview adalah berkas statis <code>og-image.png</code> di folder situs, karena
+        aplikasi pembaca tautan (WhatsApp, Facebook) tidak menjalankan JavaScript.
+        <b>Setelah mengganti Logo Perusahaan</b>, tekan tombol di atas untuk membuat gambar baru,
+        timpa <code>og-image.png</code> di folder proyek, lalu jalankan
+        <code>git add . &amp;&amp; git commit -m "logo baru" &amp;&amp; git push</code>.
+      </small>
     </div>
 
     <div class="card-surface form-block">
@@ -896,15 +988,18 @@
         <li><b>SPK Otomatis Terbit</b> — setiap order langsung menghasilkan nomor SPK untuk workshop.</li>
         <li><b>Update Status Produksi</b> — ubah SPK: Belum Dikerjakan → Proses → Selesai.</li>
         <li><b>Pantau Deadline</b> — order lewat tanggal dan belum selesai otomatis ditandai <b>Terlambat</b>.</li>
-        <li><b>Cetak Invoice</b> — PDF invoice tersimpan otomatis ke Google Drive.</li>
+        <li><b>Cetak Invoice</b> — invoice dibuat sebagai gambar JPG siap dikirim atau dicetak.</li>
         <li><b>Catat Pelunasan</b> — status pembayaran berubah otomatis: Belum Bayar → DP → Lunas.</li>
       </ol>
     </div>
 
     <div class="card-surface form-block">
       <h2 class="card-title mb-3">Pertanyaan Umum</h2>
-      <div class="faq"><b>Kenapa PDF tidak muncul?</b>
-        <p>Pastikan <code>setupAppEnvironment()</code> sudah dijalankan dan izin Drive sudah disetujui.</p></div>
+      <div class="faq"><b>Kenapa gambar SPK / Invoice tidak muncul?</b>
+        <p>Dokumen dibuat langsung di browser sebagai JPG. Bila gagal, tunggu sampai
+        proses selesai (dokumen padat butuh beberapa detik) lalu coba lagi. Pastikan juga
+        <code>setupAppEnvironment()</code> sudah dijalankan dan izin Drive sudah disetujui
+        agar mockup bisa terbaca.</p></div>
       <div class="faq"><b>Data tidak berubah setelah edit di Spreadsheet?</b>
         <p>Tekan tombol <i class="bi bi-arrow-clockwise"></i> di header untuk memuat ulang data dari server.</p></div>
       <div class="faq"><b>Harga tidak terisi otomatis?</b>
@@ -958,6 +1053,10 @@
       <div class="modal-body" id="previewBody"></div>
       <div class="modal-footer">
         <button type="button" class="btn-outline" data-bs-dismiss="modal"><i class="bi bi-x-lg"></i> Tutup</button>
+        <!-- Preview: buka gambar ukuran penuh di tab baru (modal menampilkan versi diperkecil) -->
+        <a id="previewFull" href="#" class="btn-outline" hidden>
+          <i class="bi bi-arrows-fullscreen"></i> Preview
+        </a>
         <a id="previewDownload" href="#" class="btn-outline" target="_blank" rel="noopener">
           <i class="bi bi-download"></i> Unduh
         </a>
@@ -1072,11 +1171,13 @@
      app.js     : state, router, utilitas UI, layar PIN
      pages.js   : Dashboard, Order, Detail, SPK, Invoice, Notifikasi
      forms.js   : Form Order, Ubah Order, Pengaturan
+     cetak.js   : SPK & Invoice menjadi gambar JPG siap cetak
      ══════════════════════════════════════════════════════ -->
 <script src="js/config.js"></script>
 <script src="js/api.js"></script>
 <script src="js/app.js"></script>
 <script src="js/pages.js"></script>
 <script src="js/forms.js"></script>
+<script src="js/cetak.js"></script>
 </body>
 </html>

@@ -17,7 +17,8 @@
 // Daftar aksi yang dikirim lewat GET. Selain ini dianggap tulis (POST).
 const AKSI_BACA = [
   'ping', 'getBootstrapData', 'getOrderDetail',
-  'getMockupDataUri', 'getLinkSistem', 'buatPesanTagihan'
+  'getMockupDataUri', 'getLinkSistem', 'buatPesanTagihan',
+  'dokumenSpk', 'dokumenInvoice'      // hanya menyusun HTML, tidak menulis apa pun
 ];
 
 // ── Token sesi ────────────────────────────────────────────
