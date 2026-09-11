@@ -816,18 +816,31 @@ select.input{appearance:none;background-image:linear-gradient(45deg,transparent 
 
 /* ══════════════════════════════════════════════════════════
    PRATINJAU KARTU TAUTAN (Open Graph)
+   Meniru bentuk kartu ringkas WhatsApp: logo kotak di kiri,
+   judul · deskripsi · domain di kanan.
    ══════════════════════════════════════════════════════════ */
-.og-preview{
-  border:1px solid var(--border);border-radius:var(--r-md);
-  overflow:hidden;background:var(--bg-card);margin-bottom:var(--sp-base);
+.og-kartu{
+  display:flex;align-items:stretch;gap:.8rem;
+  border:1px solid var(--border);border-left:3px solid var(--accent);
+  border-radius:var(--r-md);overflow:hidden;
+  background:var(--bg-subtle);padding:.7rem .85rem;margin-bottom:var(--sp-base);
 }
-.og-gambar{
-  width:100%;aspect-ratio:1200/630;background:var(--bg-inset);
-  background-size:cover;background-position:center;
+.og-thumb{
+  flex:none;width:76px;height:76px;border-radius:var(--r-base);
+  background:var(--bg-inset);background-size:cover;background-position:center;
 }
-.og-teks{display:flex;flex-direction:column;gap:.15rem;padding:.7rem .85rem}
-.og-teks b{font-size:13px;font-family:var(--font-head)}
-.og-teks span{font-size:11.5px;color:var(--text-muted);line-height:1.45}
+.og-teks{display:flex;flex-direction:column;gap:.2rem;min-width:0;justify-content:center}
+.og-teks b{font-size:13px;font-family:var(--font-head);line-height:1.3}
+.og-teks span{
+  font-size:11.5px;color:var(--text-muted);line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.og-teks em{font-size:11px;color:var(--text-faint);font-style:normal;margin-top:.1rem}
+.og-alamat{font-weight:400;color:var(--text-faint);text-transform:none;letter-spacing:0}
+#ogMeta{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:11px;line-height:1.6;white-space:pre;overflow-x:auto;resize:vertical;
+}
 
 /* Pesan konfirmasi boleh memuat beberapa baris */
 #confirmText{white-space:pre-line}
@@ -938,8 +951,9 @@ select.input{appearance:none;background-image:linear-gradient(45deg,transparent 
   padding:.7rem 0;border-top:1px solid var(--border);
 }
 .form-actions>*{flex:1}
-.form-actions-inline{position:static;background:transparent;border:none;padding:var(--sp-base) 0 0;backdrop-filter:none}
-.form-actions-inline>*{flex:none}
+.form-actions-inline{position:static;background:transparent;border:none;padding:var(--sp-base) 0 0;
+  backdrop-filter:none;flex-wrap:wrap}
+.form-actions-inline>*{flex:none;max-width:100%}
 
 /* ══════════════════════════════════════════════════════════
    TABEL

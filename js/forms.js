@@ -1098,48 +1098,162 @@ function hapusCustomer(id, nama, jumlahOrder) {
 // BAGIAN 13C: GAMBAR PREVIEW TAUTAN (og-image.png)
 // ══════════════════════════════════════════════════════════
 
-const OG = { LEBAR: 1200, TINGGI: 630 };
+const OG = { LEBAR: 1200, TINGGI: 630, SISI: 600 };
 
-/** Tampilkan pratinjau kecil kartu tautan di halaman Pengaturan. */
+/** Tampilkan tiruan kartu tautan + baris meta siap tempel di Pengaturan. */
 function segarkanPratinjauOg() {
   const kotak = document.getElementById('ogPratinjau');
-  if (!kotak) return;
-  gambarKartuOg().then(function (dataUri) {
-    kotak.style.backgroundImage = 'url(' + dataUri + ')';
-  }).catch(function () { /* pratinjau opsional */ });
+  if (kotak) {
+    gambarLogoShare().then(function (dataUri) {
+      kotak.style.backgroundImage = 'url(' + dataUri + ')';
+    }).catch(function () { /* pratinjau opsional */ });
+  }
+
+  const alamat = alamatSitus();
+  const domain = document.getElementById('ogDomain');
+  if (domain) domain.textContent = alamat.domain;
+
+  const label = document.getElementById('ogAlamat');
+  if (label) label.textContent = alamat.lokal ? '(situs belum online)' : '';
+
+  const kotakMeta = document.getElementById('ogMeta');
+  if (kotakMeta) kotakMeta.value = barisMeta(alamat.dasar);
 }
 
 /**
- * Buat ulang og-image.png dari Logo Perusahaan yang sedang dipakai,
- * lalu unduh supaya Owner bisa menimpa berkas di folder proyek.
+ * Alamat situs ini, dibaca dari address bar browser.
+ * Bagian nama berkas dibuang sehingga menyisakan folder tempat index.html berada.
  */
-function buatGambarPreview() {
+function alamatSitus() {
+  const asal = location.origin;
+  let jalur = location.pathname.replace(/[^/]*$/, '');   // buang nama berkas
+  if (!jalur.endsWith('/')) jalur += '/';
+  return {
+    dasar : asal + jalur,
+    domain: location.hostname || 'alamat-situs-anda',
+    lokal : /^(localhost|127\.|0\.0\.0\.0|\[::1\])/.test(location.hostname) ||
+            location.protocol === 'file:'
+  };
+}
+
+/** Empat baris meta berisi alamat penuh — pengganti baris bertanda ⤵. */
+function barisMeta(dasar) {
+  return '<meta property="og:image"        content="' + dasar + 'logo-share.png">\n' +
+         '<meta property="og:image:secure_url" content="' + dasar + 'logo-share.png">\n' +
+         '<meta property="og:url"          content="' + dasar + '">\n' +
+         '<meta name="twitter:image"       content="' + dasar + 'logo-share.png">';
+}
+
+/** Salin baris meta ke clipboard. */
+function salinMetaPreview() {
+  const kotak = document.getElementById('ogMeta');
+  if (!kotak || !kotak.value) { toast('Belum siap', 'Baris meta belum tersusun.', 'warning'); return; }
+
+  const alamat = alamatSitus();
+  if (alamat.lokal) {
+    toast('Situs belum online',
+      'Alamat yang terdeteksi masih alamat lokal. Buka aplikasi dari alamat situs yang sudah ' +
+      'online, baru salin baris metanya.', 'warning');
+    return;
+  }
+
+  const sukses = function () {
+    toast('Tersalin', 'Tempel menggantikan empat baris bertanda ⤵ di index.html, lalu git push.', 'success');
+  };
+  const manual = function () {
+    kotak.removeAttribute('readonly');
+    kotak.focus(); kotak.select(); kotak.setSelectionRange(0, 99999);
+    kotak.setAttribute('readonly', 'readonly');
+    toast('Salin manual', 'Teksnya sudah diblok — tekan Ctrl+C (atau tahan lalu Salin di HP).', 'warning');
+  };
+
+  // Clipboard API dulu (butuh HTTPS), baru cara lama sebagai cadangan
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(kotak.value).then(sukses).catch(function () { salinCaraLama(kotak, sukses, manual); });
+  } else {
+    salinCaraLama(kotak, sukses, manual);
+  }
+}
+
+function salinCaraLama(kotak, sukses, manual) {
+  kotak.removeAttribute('readonly');
+  kotak.select(); kotak.setSelectionRange(0, 99999);
+  let berhasil = false;
+  try { berhasil = document.execCommand('copy'); } catch (e) {}
+  kotak.setAttribute('readonly', 'readonly');
+  if (berhasil) sukses(); else manual();
+}
+
+/** Unduh logo persegi untuk kartu preview (bentuk seperti contoh Owner). */
+function buatLogoShare() {
+  unduhGambar(gambarLogoShare(), 'logo-share.png');
+}
+
+/** Unduh spanduk lebar — alternatif bila ingin kartu besar melebar. */
+function buatSpandukOg() {
+  unduhGambar(gambarSpandukOg(), 'og-image.png');
+}
+
+function unduhGambar(janji, nama) {
   busy(true, 'Membuat gambar preview…');
-  gambarKartuOg()
+  janji
     .then(function (dataUri) {
       busy(false);
       const a = document.createElement('a');
-      a.href = dataUri;
-      a.download = 'og-image.png';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      toast('og-image.png terunduh',
-        'Timpa berkas og-image.png di folder proyek, lalu jalankan git add . / commit / push.',
-        'success');
+      a.href = dataUri; a.download = nama;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      toast(nama + ' terunduh',
+        'Timpa berkasnya di folder proyek, lalu jalankan git add . / commit / push.', 'success');
     })
-    .catch(function (err) {
-      busy(false);
-      toast('Gagal', pesanError(err), 'danger');
-    });
+    .catch(function (err) { busy(false); toast('Gagal', pesanError(err), 'danger'); });
 }
+
+/**
+ * Logo persegi 600×600 untuk kartu preview tautan.
+ * Logo hitam diletakkan di atas plat putih bulat supaya tetap terbaca
+ * saat WhatsApp mengecilkannya menjadi ±90 piksel.
+ */
+function gambarLogoShare() {
+  return new Promise(function (resolve) {
+    const S = OG.SISI;
+    const c = document.createElement('canvas');
+    c.width = S; c.height = S;
+    const x = c.getContext('2d');
+
+    const grad = x.createLinearGradient(0, 0, 0, S);
+    grad.addColorStop(0, '#123243');
+    grad.addColorStop(0.45, '#0A1725');
+    grad.addColorStop(1, '#060D18');
+    x.fillStyle = grad; x.fillRect(0, 0, S, S);
+
+    const PLAT = 460;
+    x.fillStyle = '#FFFFFF';
+    x.beginPath(); x.arc(S / 2, S / 2, PLAT / 2, 0, Math.PI * 2); x.fill();
+
+    muatLogo(function (img) {
+      if (img) {
+        const muat = PLAT - 56;
+        const skala = Math.min(muat / img.width, muat / img.height);
+        const w = img.width * skala, h = img.height * skala;
+        x.drawImage(img, (S - w) / 2, (S - h) / 2, w, h);
+      }
+      resolve(c.toDataURL('image/png'));
+    });
+  });
+}
+
+/**
+ * Spanduk lebar 1200×630 — dipakai bila Owner ingin kartu besar melebar.
+ * Logonya diambil dari variabel CSS --logo-pingbro, jadi otomatis
+ * mengikuti Logo Perusahaan yang terakhir diunggah.
+ */
+function gambarSpandukOg() {
 
 /**
  * Gambar kartu preview 1200×630 di atas canvas.
  * Logonya diambil dari variabel CSS --logo-pingbro, jadi otomatis
  * mengikuti Logo Perusahaan yang terakhir diunggah.
  */
-function gambarKartuOg() {
   return new Promise(function (resolve, reject) {
     const c = document.createElement('canvas');
     c.width = OG.LEBAR; c.height = OG.TINGGI;
@@ -1189,22 +1303,28 @@ function gambarKartuOg() {
     x.fill();
     x.restore();
 
-    const sumber = (getComputedStyle(document.documentElement)
-      .getPropertyValue('--logo-pingbro').trim().match(/url\(\s*['"]?(.+?)['"]?\s*\)/) || [])[1];
-
-    if (!sumber) { tulis(); return; }
-
-    const img = new Image();
-    img.onload = function () {
-      const muat = sisi - 34;
-      const skala = Math.min(muat / img.width, muat / img.height);
-      const w = img.width * skala, h = img.height * skala;
-      x.drawImage(img, kiri + (sisi - w) / 2, atas + (sisi - h) / 2, w, h);
-      tulis();
-    };
-    img.onerror = function () { tulis(); };   // tanpa logo pun kartunya tetap jadi
-    img.src = sumber;
+    muatLogo(function (img) {
+      if (img) {
+        const muat = sisi - 34;
+        const skala = Math.min(muat / img.width, muat / img.height);
+        const w = img.width * skala, h = img.height * skala;
+        x.drawImage(img, kiri + (sisi - w) / 2, atas + (sisi - h) / 2, w, h);
+      }
+      tulis();   // tanpa logo pun kartunya tetap jadi
+    });
   });
+}
+
+/** Muat Logo Perusahaan yang sedang dipakai dari variabel CSS --logo-pingbro. */
+function muatLogo(selesai) {
+  const sumber = (getComputedStyle(document.documentElement)
+    .getPropertyValue('--logo-pingbro').trim().match(/url\(\s*['"]?(.+?)['"]?\s*\)/) || [])[1];
+  if (!sumber) { selesai(null); return; }
+
+  const img = new Image();
+  img.onload  = function () { selesai(img); };
+  img.onerror = function () { selesai(null); };
+  img.src = sumber;
 }
 
 /**

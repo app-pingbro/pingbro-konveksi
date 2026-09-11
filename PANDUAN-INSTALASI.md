@@ -175,7 +175,8 @@ Isinya harus persis begini:
 pingbro-konveksi/
 ├── index.html          ← harus di lapisan paling luar
 ├── .nojekyll
-├── og-image.png        ← gambar preview saat tautan dibagikan
+├── logo-share.png      ← logo persegi untuk kartu preview tautan
+├── og-image.png        ← spanduk lebar (alternatif kartu preview)
 ├── README.md
 ├── css/
 │   └── style.css
@@ -379,7 +380,8 @@ Buka alamat situs Anda, lalu periksa berurutan:
 | 7 | Cetak SPK / Invoice | Gambar **JPG** terbuka di jendela pratinjau dengan tombol **Preview · Unduh JPG · Print** |
 | 7b | Perhatikan mockup pada SPK | Mockup mengisi ruang kosong yang tersisa, rasio gambar tidak berubah, seluruh isi tetap 1 halaman |
 | 7c | Pengaturan → Data Customer → Hapus | Muncul konfirmasi; setelah dihapus, customer hilang dari daftar **tetapi order, SPK, invoice, dan pembayarannya tetap ada** |
-| 7d | Bagikan link situs ke WhatsApp | Muncul kartu preview: gambar + "Konveksi & Sablon" + deskripsi |
+| 7d | Pengaturan → Preview Tautan → **Salin Baris Meta**, tempel ke `index.html`, lalu `git push` | Lihat bagian **Preview tautan** di Catatan Teknis |
+| 7e | Bagikan link situs ke WhatsApp | Muncul kartu: **logo kotak di kiri** + "Konveksi & Sablon" + deskripsi |
 | 8 | Centang checklist produksi di SPK | Status di Dashboard ikut berubah seketika |
 | 9 | Catat pembayaran | Status berubah Belum Bayar → DP → Lunas |
 | 10 | Tekan tombol back HP/browser | Kembali ke halaman sebelumnya |
@@ -450,8 +452,10 @@ itu cache browser — tekan **Ctrl+Shift+R**, atau buka di jendela **Incognito**
 | Gambar SPK/Invoice lama muncul | Dokumen padat butuh beberapa detik untuk dirender di browser | Tunggu sampai selesai; jangan menekan tombol cetak berkali-kali |
 | Mockup tidak ikut tercetak | Gambar mockup gagal diambil dari Drive | Di tempatnya akan muncul keterangan + tautan Drive; buka mockup lewat Detail Order |
 | Tombol Print tidak membuka apa-apa | Pop-up diblokir browser | Izinkan pop-up untuk situs ini, atau pakai **Unduh JPG** lalu cetak dari galeri |
-| Preview tautan masih memakai logo lama | `og-image.png` belum diperbarui | Pengaturan → Preview Tautan → **Buat Ulang og-image.png**, timpa berkasnya, lalu `git push` |
-| Preview tautan tidak muncul di WhatsApp | WhatsApp menyimpan cache preview per tautan | Coba kirim tautan dengan tambahan `?v=2` di belakangnya, atau tunggu beberapa jam |
+| Logo tidak muncul sama sekali saat link dibagikan | `og:image` masih memakai alamat relatif | Pengaturan → Preview Tautan → **Salin Baris Meta**, tempel ke `index.html` menggantikan baris bertanda ⤵, lalu `git push` |
+| Preview tautan masih memakai logo lama | `logo-share.png` belum diperbarui | Pengaturan → Preview Tautan → **Buat Ulang logo-share.png**, timpa berkasnya, lalu `git push` |
+| Preview tautan tidak muncul di WhatsApp | WhatsApp menyimpan cache preview per tautan | Kirim tautan dengan tambahan `?v=2` di belakangnya, atau tunggu beberapa jam |
+| Kartu preview tampil melebar, bukan logo kotak | `og:image` mengarah ke `og-image.png` | Ganti ke `logo-share.png` dan setel `og:image:width`/`height` ke 600 |
 
 ## Perbaikan: situs 404
 
@@ -547,26 +551,71 @@ Penghapusan customer memakai cara **arsip**, bukan menghapus baris:
 - Ingin mengembalikannya? Buka spreadsheet `DB_PINGBRO` → sheet `Customer` →
   kosongkan kembali sel pada kolom `Dihapus`.
 
-## Preview tautan (Open Graph)
+## Preview tautan — supaya logo muncul saat link dibagikan
 
 Aplikasi pembaca tautan (WhatsApp, Facebook, Telegram) **tidak menjalankan
-JavaScript**, jadi kartu preview harus berupa data statis di dalam `index.html`
-dan gambar `og-image.png` di folder situs. Karena itu gambar preview tidak bisa
-mengikuti Logo Perusahaan secara otomatis.
+JavaScript**, jadi kartu preview harus berupa teks statis di dalam `index.html`
+dan berkas gambar di folder situs.
 
-Yang bisa dilakukan hanya satu langkah: setelah logo diganti, buka
-**Pengaturan → Preview Tautan → Buat Ulang og-image.png**, timpa berkas
-`og-image.png` di folder proyek, lalu:
+Bentuk kartunya mengikuti ukuran gambar:
 
-```bash
-git add .
-git commit -m "perbarui gambar preview tautan"
-git push
-```
+| Berkas | Ukuran | Hasil di WhatsApp |
+|---|---|---|
+| `logo-share.png` | 600 × 600 (persegi) | **Kartu ringkas** — logo kotak di kiri, judul & deskripsi di kanan ← dipakai sekarang |
+| `og-image.png` | 1200 × 630 (melebar) | Kartu besar melebar dengan spanduk di atas judul |
 
-Opsional, untuk kompatibilitas maksimal: di `index.html` ganti dua baris bertanda
-`⤵` menjadi alamat penuh situs Anda, misalnya
-`https://namaanda.github.io/pingbro-konveksi/og-image.png`.
+Ingin menukar ke spanduk lebar? Di `index.html`, ganti `logo-share.png` menjadi
+`og-image.png` pada baris `og:image`, `og:image:secure_url`, dan `twitter:image`;
+ubah `og:image:width` menjadi `1200` dan `og:image:height` menjadi `630`; lalu
+ubah `twitter:card` dari `summary` menjadi `summary_large_image`.
+
+### Langkah 1 — pasang alamat penuh (sekali saja, WAJIB)
+
+Ini penyebab paling umum logo **tidak muncul**: sebagian aplikasi chat menolak
+alamat gambar yang relatif seperti `logo-share.png` dan hanya menerima alamat
+penuh seperti `https://namaanda.github.io/pingbro-konveksi/logo-share.png`.
+
+Tidak perlu mengetik manual:
+
+1. Buka aplikasi **dari alamat situs yang sudah online** (bukan dari berkas lokal)
+2. Masuk ke **Pengaturan → Preview Tautan**
+3. Tekan **Salin Baris Meta** — alamat situs terbaca otomatis dari address bar
+4. Buka `index.html`, cari empat baris bertanda **⤵**, ganti dengan hasil salinan
+5. `git add . && git commit -m "alamat preview tautan" && git push`
+
+> Kalau aplikasi dibuka dari alamat lokal (`127.0.0.1` atau berkas di komputer),
+> tombol itu menolak menyalin dan memberi tahu alasannya — supaya alamat lokal
+> tidak ikut tertanam di `index.html`.
+
+### Langkah 2 — setiap kali Logo Perusahaan diganti
+
+1. **Pengaturan → Preview Tautan → Buat Ulang logo-share.png**
+2. Timpa berkas `logo-share.png` di folder proyek dengan hasil unduhan
+3. ```bash
+   git add .
+   git commit -m "perbarui logo preview tautan"
+   git push
+   ```
+
+(Tombol **Buat Ulang og-image.png** melakukan hal yang sama untuk versi spanduk lebar.)
+
+### Menguji hasilnya
+
+WhatsApp menyimpan preview per tautan cukup lama, jadi tautan yang sudah pernah
+dikirim biasanya masih menampilkan versi lama. Untuk menguji:
+
+- Kirim tautan dengan tambahan pembeda di belakangnya, misalnya
+  `https://namaanda.github.io/pingbro-konveksi/?v=2`
+- Untuk Facebook: buka **developers.facebook.com/tools/debug**, tempel tautannya,
+  tekan **Scrape Again**
+
+Bila logo tetap tidak muncul, periksa berurutan:
+
+1. Buka alamat gambar langsung di browser —
+   `https://alamat-situs-anda/logo-share.png` harus menampilkan logo, bukan 404
+2. Buka halaman situs → klik kanan → **View Page Source** → cari `og:image` —
+   isinya harus alamat penuh `https://…`, bukan `logo-share.png` saja
+3. Pastikan situs diakses lewat **https**, bukan http
 
 ---
 

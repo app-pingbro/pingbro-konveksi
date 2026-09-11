@@ -23,32 +23,40 @@
        KARTU PREVIEW SAAT TAUTAN DIBAGIKAN (Open Graph)
        Dipakai WhatsApp, Telegram, Facebook, LinkedIn, dll.
 
-       Gambarnya adalah berkas og-image.png di folder yang sama.
-       Aplikasi pembaca tautan tidak menjalankan JavaScript, jadi
-       nilai di bawah HARUS berupa teks statis — bukan diisi dari
-       Pengaturan. Setelah Logo Perusahaan diganti, buat ulang
-       og-image.png lewat Pengaturan → Preview Tautan.
+       Gambarnya: logo-share.png (logo persegi) di folder yang sama.
+       Hasilnya kartu ringkas — logo kotak di kiri, judul & deskripsi
+       di kanan. Tersedia juga og-image.png (spanduk lebar) bila suatu
+       saat ingin ditukar; cukup ganti nama berkas di baris og:image
+       dan twitter:image, lalu ubah width/height menjadi 1200 × 630.
 
-       OPSIONAL (kompatibilitas maksimal): ganti kedua baris
-       bertanda ⤵ menjadi alamat penuh situs Anda, contoh
-       https://namaanda.github.io/pingbro-konveksi/
+       ┌── SATU HAL YANG PERLU ANDA ISI ───────────────────────┐
+       │ Empat baris bertanda ⤵ sebaiknya memakai ALAMAT PENUH │
+       │ situs, bukan nama berkas saja. Sebagian aplikasi chat  │
+       │ menolak alamat relatif sehingga logonya tidak muncul.  │
+       │                                                       │
+       │ Tidak perlu mengetik manual: buka aplikasi lalu masuk  │
+       │ ke Pengaturan → Preview Tautan → "Salin Baris Meta".   │
+       │ Alamat situs terdeteksi sendiri, tinggal tempel di     │
+       │ sini menggantikan keempat baris bertanda ⤵.           │
+       └───────────────────────────────────────────────────────┘
        ══════════════════════════════════════════════════════ -->
-  <meta property="og:site_name"   content="PING BRO Konveksi &amp; Sablon">
-  <meta property="og:type"        content="website">
-  <meta property="og:title"       content="Konveksi &amp; Sablon">
-  <meta property="og:description" content="Aplikasi Manajemen Operasional, Produksi &amp; Keuangan">
-  <meta property="og:image"       content="og-image.png">          <!-- ⤵ -->
-  <meta property="og:image:type"  content="image/png">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:alt"   content="Logo PING BRO Konveksi &amp; Sablon">
-  <meta property="og:url"         content="./">                    <!-- ⤵ -->
-  <meta property="og:locale"      content="id_ID">
+  <meta property="og:site_name"    content="PING BRO Konveksi &amp; Sablon">
+  <meta property="og:type"         content="website">
+  <meta property="og:title"        content="Konveksi &amp; Sablon">
+  <meta property="og:description"  content="Aplikasi Manajemen Operasional, Produksi &amp; Keuangan">
+  <meta property="og:image"        content="https://pingbro.vercel.app/logo-share.png">   <!-- ⤵ alamat penuh -->
+  <meta property="og:image:secure_url" content="https://pingbro.vercel.app/logo-share.png"><!-- ⤵ alamat penuh -->
+  <meta property="og:image:type"   content="image/png">
+  <meta property="og:image:width"  content="600">
+  <meta property="og:image:height" content="600">
+  <meta property="og:image:alt"    content="Logo PING BRO Konveksi &amp; Sablon">
+  <meta property="og:url"          content="https://pingbro.vercel.app/">               <!-- ⤵ alamat penuh -->
+  <meta property="og:locale"       content="id_ID">
 
-  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:card"        content="summary">
   <meta name="twitter:title"       content="Konveksi &amp; Sablon">
   <meta name="twitter:description" content="Aplikasi Manajemen Operasional, Produksi &amp; Keuangan">
-  <meta name="twitter:image"       content="og-image.png">
+  <meta name="twitter:image"       content="https://pingbro.vercel.app/logo-share.png">   <!-- ⤵ alamat penuh -->
 
   <link rel="canonical" href="./">
 
@@ -906,26 +914,48 @@
         </div>
       </div>
 
-      <div class="og-preview">
-        <div class="og-gambar" id="ogPratinjau" role="img" aria-label="Gambar preview tautan"></div>
+      <!-- Tiruan kartu WhatsApp: logo kotak di kiri, teks di kanan -->
+      <div class="og-kartu">
+        <div class="og-thumb" id="ogPratinjau" role="img" aria-label="Logo preview tautan"></div>
         <div class="og-teks">
           <b>Konveksi &amp; Sablon</b>
           <span>Aplikasi Manajemen Operasional, Produksi &amp; Keuangan</span>
+          <em id="ogDomain">alamat-situs-anda</em>
         </div>
       </div>
 
       <div class="form-actions form-actions-inline">
-        <button class="btn-primary" onclick="buatGambarPreview()">
-          <i class="bi bi-image"></i> Buat Ulang og-image.png
+        <button class="btn-primary" onclick="salinMetaPreview()">
+          <i class="bi bi-clipboard-check"></i> Salin Baris Meta
+        </button>
+        <button class="btn-outline" onclick="buatLogoShare()">
+          <i class="bi bi-image"></i> Buat Ulang logo-share.png
+        </button>
+        <button class="btn-outline" onclick="buatSpandukOg()">
+          <i class="bi bi-aspect-ratio"></i> Buat Ulang og-image.png
         </button>
       </div>
 
+      <div class="field field-full">
+        <label>Baris meta siap tempel <span id="ogAlamat" class="og-alamat"></span></label>
+        <textarea id="ogMeta" class="input" rows="4" readonly spellcheck="false"></textarea>
+      </div>
+
       <small class="hint">
-        Gambar preview adalah berkas statis <code>og-image.png</code> di folder situs, karena
-        aplikasi pembaca tautan (WhatsApp, Facebook) tidak menjalankan JavaScript.
-        <b>Setelah mengganti Logo Perusahaan</b>, tekan tombol di atas untuk membuat gambar baru,
-        timpa <code>og-image.png</code> di folder proyek, lalu jalankan
+        Aplikasi pembaca tautan (WhatsApp, Facebook, Telegram) <b>tidak menjalankan JavaScript</b>,
+        jadi kartu preview harus berupa teks statis di <code>index.html</code> dan berkas gambar
+        di folder situs. Dua hal yang perlu Anda lakukan:
+        <br><br>
+        <b>1. Sekali saja —</b> tekan <b>Salin Baris Meta</b>, buka <code>index.html</code>,
+        lalu ganti empat baris bertanda <b>⤵</b> dengan hasil salinan itu. Alamat situsnya
+        sudah terisi otomatis dari alamat halaman ini.
+        <br>
+        <b>2. Setiap ganti Logo Perusahaan —</b> tekan <b>Buat Ulang logo-share.png</b>,
+        timpa berkasnya di folder proyek, lalu
         <code>git add . &amp;&amp; git commit -m "logo baru" &amp;&amp; git push</code>.
+        <br><br>
+        WhatsApp menyimpan preview per tautan cukup lama. Untuk menguji hasilnya, kirim
+        tautan dengan tambahan <code>?v=2</code> di belakangnya.
       </small>
     </div>
 
