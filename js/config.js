@@ -17,7 +17,7 @@ const KONFIG = {
 
   // ── WAJIB DIISI ────────────────────────────────────────
   // Contoh: 'https://script.google.com/macros/s/AKfycbxxxxxxxxxxxx/exec'
-  GAS_URL: 'https://script.google.com/macros/s/AKfycbwsF8XDsYvvoJ7PrL59FuxsKXzZ7fRLQh3iU-LUxFrnAL1NVuNLU2zstjH7oXtFuvea/exec',
+  GAS_URL: 'https://script.google.com/macros/s/AKfycby_f7A7qDavw0vS0yGuZRZ3WTghdVCQyYz5HgcWHLdpUsiU9JriJ6d9FHUhyzT1ailn/exec',
 
   // ── Opsional ───────────────────────────────────────────
   // Kunci penyimpanan lokal di browser (ubah bila memasang lebih dari satu aplikasi
