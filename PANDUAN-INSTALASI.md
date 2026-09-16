@@ -186,6 +186,7 @@ pingbro-konveksi/
     ├── app.js
     ├── pages.js
     ├── forms.js
+    ├── material.js
     └── cetak.js
 ```
 
@@ -382,6 +383,8 @@ Buka alamat situs Anda, lalu periksa berurutan:
 | 7c | Pengaturan → Data Customer → Hapus | Muncul konfirmasi; setelah dihapus, customer hilang dari daftar **tetapi order, SPK, invoice, dan pembayarannya tetap ada** |
 | 7d | Pengaturan → Preview Tautan → **Salin Baris Meta**, tempel ke `index.html`, lalu `git push` | Lihat bagian **Preview tautan** di Catatan Teknis |
 | 7e | Bagikan link situs ke WhatsApp | Muncul kartu: **logo kotak di kiri** + "Konveksi & Sablon" + deskripsi |
+| 7f | Isi Rincian Ukuran pada Buat Order | **RINCIAN MATERIAL** di bawahnya langsung menampilkan kebutuhan bahan, tanpa tombol Hitung |
+| 7g | Pengaturan → Rumus Material | Muncul 11 material bawaan; tekan Edit untuk mengubah rumusnya |
 | 8 | Centang checklist produksi di SPK | Status di Dashboard ikut berubah seketika |
 | 9 | Catat pembayaran | Status berubah Belum Bayar → DP → Lunas |
 | 10 | Tekan tombol back HP/browser | Kembali ke halaman sebelumnya |
@@ -407,6 +410,24 @@ git push
 
 GitHub Pages membangun ulang dalam 1–2 menit. Kalau masih tampil versi lama,
 itu cache browser — tekan **Ctrl+Shift+R**, atau buka di jendela **Incognito**.
+
+## Menambahkan sheet baru (mis. saat fitur Rincian Material dipasang)
+
+Sebagian pembaruan butuh tabel baru di database. Caranya:
+
+1. Tempel `Kode.gs` yang baru ke Apps Script, **Ctrl+S**
+2. Pada dropdown fungsi di bar atas, pilih **`migrasiMaterial`** → **▶ Run**
+3. Buka **Execution log**, pastikan muncul `✅ Migrasi Rincian Material selesai.`
+4. Lanjutkan dengan **Deploy → Manage deployments → ✏️ → New version → Deploy**
+
+Fungsi migrasi aman dijalankan berkali-kali: sheet yang sudah ada tidak disentuh,
+dan material bawaan hanya ditambahkan bila daftarnya masih kosong.
+
+> Menjalankan ulang `setupAppEnvironment()` juga bisa dipakai dan sama amannya —
+> semua folder dan sheet dibuat hanya bila belum ada. Tapi `migrasiMaterial()`
+> lebih ringkas karena hanya mengurus bagian yang baru.
+
+---
 
 ## Mengubah backend / Kode.gs
 
@@ -449,6 +470,9 @@ itu cache browser — tekan **Ctrl+Shift+R**, atau buka di jendela **Incognito**
 | "Sesi berakhir" padahal baru login | PIN diganti di perangkat lain | Masukkan PIN yang baru |
 | PIN lupa | — | Buka spreadsheet **DB_PINGBRO** → sheet **AppConfig** → baris `pinAkses` → lihat/ubah nilainya |
 | Data tidak muncul, log Apps Script kosong | `setupAppEnvironment()` belum dijalankan | Jalankan sekali (langkah A3) |
+| Rincian Material kosong padahal pcs sudah diisi | Kata kunci bahan tidak cocok, atau jenis produk tidak termasuk penyaring | Keterangannya muncul di tempat rincian; sesuaikan di Pengaturan → Rumus Material |
+| Pengaturan → Rumus Material kosong | Sheet `Master_Material` belum dibuat | Jalankan `migrasiMaterial()` di Apps Script, lalu deploy versi baru |
+| Angka material di order lama berbeda dari rumus sekarang | Memang begitu — yang tampil adalah hasil historis saat order disimpan | Buka Edit Order lalu simpan lagi bila ingin dihitung ulang |
 | Gambar SPK/Invoice lama muncul | Dokumen padat butuh beberapa detik untuk dirender di browser | Tunggu sampai selesai; jangan menekan tombol cetak berkali-kali |
 | Mockup tidak ikut tercetak | Gambar mockup gagal diambil dari Drive | Di tempatnya akan muncul keterangan + tautan Drive; buka mockup lewat Detail Order |
 | Tombol Print tidak membuka apa-apa | Pop-up diblokir browser | Izinkan pop-up untuk situs ini, atau pakai **Unduh JPG** lalu cetak dari galeri |
@@ -550,6 +574,89 @@ Penghapusan customer memakai cara **arsip**, bukan menghapus baris:
   customer saat membuat order.
 - Ingin mengembalikannya? Buka spreadsheet `DB_PINGBRO` → sheet `Customer` →
   kosongkan kembali sel pada kolom `Dihapus`.
+
+## Rincian Material — kebutuhan bahan yang terhitung sendiri
+
+Di bawah **Rincian Item** (Detail Order) dan di bawah **Rincian Ukuran & Harga**
+(form Buat/Ubah Order) ada bagian **RINCIAN MATERIAL**. Isinya kebutuhan kain
+yang dihitung otomatis dari jumlah pcs per kategori dan ukuran.
+
+### Rumusnya tidak ditanam di kode
+
+Semua rumus tersimpan di sheet **Master_Material** dan diubah lewat
+**Pengaturan → Rumus Material**. Anda bisa menambah material baru, mengganti
+pembagi, mengubah satuan, atau menonaktifkan material — tanpa memasang ulang
+aplikasi dan tanpa menyentuh satu baris kode pun.
+
+### Material bawaan
+
+| Material | Satuan | Untuk Jenis Produk | Kata Kunci Bahan |
+|---|---|---|---|
+| NORMAL 30s | Kg | Kaos | 30s |
+| LONGSLEEVE 30s | Kg | Lengan Panjang | 30s |
+| NORMAL 24s | Kg | Kaos | 24s |
+| LONGSLEEVE 24s | Kg | Lengan Panjang | 24s |
+| NORMAL 20s | Kg | Kaos | 20s |
+| LONGSLEEVE 20s | Kg | Lengan Panjang | 20s |
+| OVERSIZE 24 | Kg | Oversize | 24 |
+| OVERSIZE 20s | Kg | Oversize | 20s |
+| POLO 24s | Kg | Polo | 24s |
+| RIB LONGSLEEVE | Cm | Lengan Panjang | *(semua)* |
+| RIB | Kg | — | — | *(nonaktif, rumusnya Anda isi sendiri)* |
+
+### Bagaimana aplikasi memilih material
+
+Dua penyaring dipakai bersamaan:
+
+1. **Jenis Produk** pada kartu kategori (Kaos / Oversize / Polo / Lengan Panjang)
+2. **Kata kunci bahan** dicocokkan dengan isi kolom **Bahan** pada order
+
+Contoh: order Kaos dengan bahan "Cotton Combed 30s" → yang muncul hanya
+**NORMAL 30s**. Ganti bahannya jadi "Cotton Combed 24s" → yang muncul
+**NORMAL 24s**. Material yang hasilnya nol tidak ditampilkan.
+
+> **Kalau tidak ada material yang muncul**, biasanya kolom Bahan ditulis dengan
+> istilah lain (mis. "CC 30" bukan "30s"). Aplikasi akan menyebutkan hal itu
+> di tempat rincian material. Perbaiki dengan salah satu cara: tulis bahannya
+> memakai kata kunci yang cocok, atau ubah kata kunci material di
+> **Pengaturan → Rumus Material**.
+
+### Cara menulis rumus
+
+| Variabel | Artinya |
+|---|---|
+| `COWOK` `CEWEK` `ANAK` | jumlah pcs kategori tersebut |
+| `COWOK XS-M` | dibatasi rentang ukuran |
+| `COWOK M` | satu ukuran saja |
+| `TOTAL` | semua pcs yang lolos penyaring material |
+| `TOTAL SEMUA` | semua pcs pada order, tanpa penyaring |
+| `PRODUK Lengan Panjang` | pcs jenis produk tertentu |
+
+Operator: `+` `-` `*` `×` `/` dan tanda kurung `( )`. Desimal boleh pakai koma.
+
+```
+(COWOK XS-M / 6) + (COWOK L-XL / 5,5) + (CEWEK XS-XXXL / 6)
+TOTAL / 4 × 13
+```
+
+Saat rumus diketik, kotak di bawahnya langsung memberi tahu apakah rumusnya
+terbaca, dan memperlihatkan contoh hasilnya. Rumus yang salah tidak bisa disimpan.
+
+> Ukuran buatan sendiri (mis. "4L Jumbo") ikut terhitung pada `TOTAL` dan pada
+> rentang penuh `XS-XXXL`, tetapi tidak pada rentang sempit seperti `L-XL` —
+> supaya kainnya tidak hilang dari perhitungan, tapi juga tidak salah masuk.
+
+### Mengubah rumus tidak merusak order lama
+
+Setiap kali order disimpan, hasil perhitungannya ikut dicatat di sheet
+**Order_Material** lengkap dengan teks rumus yang dipakai saat itu. Jadi:
+
+- Order lama tetap menampilkan angka historisnya walaupun rumusnya Anda ubah
+- Setiap kali order diedit (pcs, ukuran, kategori, jenis produk, bahan),
+  angkanya dihitung ulang dan arsipnya ditimpa
+- Menghapus material di Pengaturan **tidak** menghapus angka pada order lama
+
+---
 
 ## Preview tautan — supaya logo muncul saat link dibagikan
 

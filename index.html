@@ -44,19 +44,19 @@
   <meta property="og:type"         content="website">
   <meta property="og:title"        content="Konveksi &amp; Sablon">
   <meta property="og:description"  content="Aplikasi Manajemen Operasional, Produksi &amp; Keuangan">
-  <meta property="og:image"        content="https://pingbro.vercel.app/logo-share.png">   <!-- ⤵ alamat penuh -->
-  <meta property="og:image:secure_url" content="https://pingbro.vercel.app/logo-share.png"><!-- ⤵ alamat penuh -->
+  <meta property="og:image"        content="logo-share.png">   <!-- ⤵ alamat penuh -->
+  <meta property="og:image:secure_url" content="logo-share.png"><!-- ⤵ alamat penuh -->
   <meta property="og:image:type"   content="image/png">
   <meta property="og:image:width"  content="600">
   <meta property="og:image:height" content="600">
   <meta property="og:image:alt"    content="Logo PING BRO Konveksi &amp; Sablon">
-  <meta property="og:url"          content="https://pingbro.vercel.app/">               <!-- ⤵ alamat penuh -->
+  <meta property="og:url"          content="./">               <!-- ⤵ alamat penuh -->
   <meta property="og:locale"       content="id_ID">
 
   <meta name="twitter:card"        content="summary">
   <meta name="twitter:title"       content="Konveksi &amp; Sablon">
   <meta name="twitter:description" content="Aplikasi Manajemen Operasional, Produksi &amp; Keuangan">
-  <meta name="twitter:image"       content="https://pingbro.vercel.app/logo-share.png">   <!-- ⤵ alamat penuh -->
+  <meta name="twitter:image"       content="logo-share.png">   <!-- ⤵ alamat penuh -->
 
   <link rel="canonical" href="./">
 
@@ -452,7 +452,9 @@
           <!-- Grup bahan disembunyikan pada alur "Sablon Saja" -->
           <div class="field" data-grup="bahan">
             <label>Bahan / Material</label>
-            <input type="text" id="orderBahan" class="input" list="listBahan" placeholder="Cotton Combed 24s Reaktif">
+            <input type="text" id="orderBahan" class="input" list="listBahan"
+                   placeholder="Cotton Combed 24s Reaktif"
+                   oninput="hitungTotalOrder()">   <!-- bahan ikut menentukan material -->
             <datalist id="listBahan">
               <option value="Cotton Combed 20s"></option>
               <option value="Cotton Combed 24s"></option>
@@ -496,6 +498,15 @@
           </div>
           <div class="item-add-row" id="itemAddRow"></div>
           <div id="itemRows"></div>
+        </div>
+
+        <!-- Rincian material — terhitung sendiri dari rincian ukuran di atas -->
+        <div class="item-panel mt-3" id="panelMaterial">
+          <div class="item-panel-head">
+            <span class="item-panel-title">RINCIAN MATERIAL</span>
+            <span class="item-panel-total" id="materialBahan">Bahan: —</span>
+          </div>
+          <div id="materialRows"></div>
         </div>
 
         <!-- Panel B — rincian item sablon (Sablon Saja, Jahit + Sablon) -->
@@ -847,6 +858,31 @@
       </div>
     </div>
 
+    <!-- Rumus Material: daftar material + rumus kebutuhan bahan -->
+    <div class="card-surface form-block">
+      <div class="block-head">
+        <span class="block-num"><i class="bi bi-rulers"></i></span>
+        <div>
+          <h2 class="card-title">Rumus Material</h2>
+          <p class="card-sub">Perhitungan kebutuhan bahan yang tampil pada Rincian Material</p>
+        </div>
+      </div>
+
+      <div id="listMaterial"><div class="empty-state">Memuat…</div></div>
+
+      <div class="form-actions form-actions-inline">
+        <button class="btn-primary" onclick="bukaFormMaterial('')">
+          <i class="bi bi-plus-lg"></i> Tambah Material
+        </button>
+      </div>
+
+      <small class="hint">
+        Rumus tersimpan di database, bukan di dalam kode — jadi bisa diubah kapan saja
+        tanpa memasang ulang aplikasi. Mengubah rumus <b>tidak mengubah angka pada order
+        yang sudah tersimpan</b>; hasil lama tetap tercatat apa adanya.
+      </small>
+    </div>
+
     <!-- Data Customer: daftar + hapus (arsip, transaksi tetap aman) -->
     <div class="card-surface form-block">
       <div class="block-head">
@@ -1098,6 +1134,100 @@
   </div>
 </div>
 
+<!-- MODAL: RUMUS MATERIAL -->
+<div class="modal fade" id="materialModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content app-modal">
+      <div class="modal-header">
+        <h5 class="modal-title" id="materialTitle">Rumus Material</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="matId">
+
+        <div class="form-grid">
+          <div class="field">
+            <label>Nama Material</label>
+            <input type="text" id="matNama" class="input" placeholder="NORMAL 30s">
+          </div>
+          <div class="field">
+            <label>Satuan Hasil</label>
+            <input type="text" id="matSatuan" class="input" list="listSatuan" placeholder="Kg">
+            <datalist id="listSatuan">
+              <option value="Kg"></option>
+              <option value="Cm"></option>
+              <option value="Meter"></option>
+              <option value="Yard"></option>
+              <option value="Roll"></option>
+              <option value="Pcs"></option>
+              <option value="Lusin"></option>
+            </datalist>
+          </div>
+
+          <div class="field">
+            <label>Berlaku untuk Jenis Produk</label>
+            <input type="text" id="matProduk" class="input" placeholder="Kaos, Oversize">
+            <small class="hint">Pisahkan dengan koma. Kosongkan = semua jenis produk.</small>
+          </div>
+          <div class="field">
+            <label>Kata Kunci Bahan</label>
+            <input type="text" id="matBahan" class="input" placeholder="30s">
+            <small class="hint">Dicari pada kolom Bahan order. Kosongkan = bahan apa pun.</small>
+          </div>
+
+          <div class="field field-full">
+            <label>Rumus</label>
+            <textarea id="matRumus" class="input" rows="3" spellcheck="false"
+              placeholder="(COWOK XS-M / 6) + (COWOK L-XL / 5,5) + (CEWEK XS-XXXL / 6)"
+              oninput="cobaRumusMaterial()"></textarea>
+            <div id="matUji" class="mat-uji"></div>
+          </div>
+
+          <div class="field field-full">
+            <details class="mat-bantuan">
+              <summary>Cara menulis rumus</summary>
+              <div class="mat-bantuan-isi">
+                <p><b>Variabel yang tersedia</b></p>
+                <ul>
+                  <li><code>COWOK</code> · <code>CEWEK</code> · <code>ANAK</code> — jumlah pcs kategori tersebut</li>
+                  <li><code>COWOK XS-M</code> — dibatasi rentang ukuran</li>
+                  <li><code>COWOK M</code> — satu ukuran saja</li>
+                  <li><code>TOTAL</code> — semua pcs yang lolos penyaring di atas</li>
+                  <li><code>TOTAL SEMUA</code> — semua pcs pada order, tanpa penyaring</li>
+                  <li><code>PRODUK Lengan Panjang</code> — pcs jenis produk tertentu</li>
+                </ul>
+                <p><b>Operator</b> <code>+</code> <code>-</code> <code>*</code> <code>×</code>
+                   <code>/</code> dan tanda kurung <code>( )</code>.
+                   Desimal boleh pakai koma: <code>5,5</code></p>
+                <p><b>Contoh</b><br>
+                  <code>(COWOK XS-M / 6) + (COWOK L-XL / 5,5) + (CEWEK XS-XXXL / 6)</code><br>
+                  <code>TOTAL / 4 × 13</code></p>
+                <p>Ukuran buatan sendiri (mis. "4L Jumbo") ikut terhitung pada
+                   <code>TOTAL</code> dan rentang penuh <code>XS-XXXL</code>,
+                   tetapi tidak pada rentang sempit seperti <code>L-XL</code>.</p>
+              </div>
+            </details>
+          </div>
+
+          <div class="field field-full">
+            <label class="tahap-item" style="cursor:pointer">
+              <input type="checkbox" id="matAktif" checked>
+              <span class="tahap-box"><i class="bi bi-check-lg"></i></span>
+              <span class="tahap-nama">Aktif — ikut dihitung pada Rincian Material</span>
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-outline" data-bs-dismiss="modal"><i class="bi bi-x-lg"></i> Batal</button>
+        <button type="button" class="btn-primary" id="matSimpanBtn" onclick="simpanMaterial()">
+          <i class="bi bi-save"></i> Simpan
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL: KONFIRMASI -->
 <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered modal-sm">
@@ -1201,6 +1331,7 @@
      app.js     : state, router, utilitas UI, layar PIN
      pages.js   : Dashboard, Order, Detail, SPK, Invoice, Notifikasi
      forms.js   : Form Order, Ubah Order, Pengaturan
+     material.js: rumus & perhitungan kebutuhan bahan
      cetak.js   : SPK & Invoice menjadi gambar JPG siap cetak
      ══════════════════════════════════════════════════════ -->
 <script src="js/config.js"></script>
@@ -1208,6 +1339,7 @@
 <script src="js/app.js"></script>
 <script src="js/pages.js"></script>
 <script src="js/forms.js"></script>
+<script src="js/material.js"></script>
 <script src="js/cetak.js"></script>
 </body>
 </html>

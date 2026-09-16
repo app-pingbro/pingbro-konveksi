@@ -17,7 +17,8 @@ js/config.js          ← SATU-SATUNYA berkas yang wajib Anda edit
 js/api.js             Lapisan fetch ke Apps Script + token sesi
 js/app.js             State, router, utilitas UI, layar PIN
 js/pages.js           Dashboard, Order, Detail, SPK, Invoice, Notifikasi
-js/forms.js           Form Order, Ubah Order, Pengaturan, Data Customer
+js/forms.js           Form Order, Ubah Order, Pengaturan, Data Customer, Rumus Material
+js/material.js        Rumus & perhitungan kebutuhan bahan
 js/cetak.js           SPK & Invoice menjadi gambar JPG siap cetak
 ```
 
@@ -48,3 +49,7 @@ Ringkasnya:
   ke `index.html` menggantikan empat baris bertanda ⤵, lalu `git push`.
 - Setelah Logo Perusahaan diganti, buat ulang gambarnya lewat
   **Pengaturan → Preview Tautan**, timpa berkasnya, lalu `git push`.
+- **Rincian Material** menghitung kebutuhan bahan otomatis dari Rincian Item.
+  Rumusnya tersimpan di database dan diubah lewat **Pengaturan → Rumus Material** —
+  tidak perlu menyentuh kode. Backend butuh sheet baru: jalankan
+  `migrasiMaterial()` sekali di Apps Script.

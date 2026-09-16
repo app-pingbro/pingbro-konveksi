@@ -801,6 +801,109 @@ select.input{appearance:none;background-image:linear-gradient(45deg,transparent 
 .spk-mockup .item-empty{margin:0}
 
 /* ══════════════════════════════════════════════════════════
+   RINCIAN MATERIAL
+   Grid kompak: nama material di atas, angka tebal di bawah.
+   Desktop 4 kolom → tablet 3 → ponsel 2, tanpa teks terpotong.
+   ══════════════════════════════════════════════════════════ */
+.mat-grid{
+  display:grid;gap:.5rem;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+}
+.mat-sel{
+  background:var(--bg-subtle);border:1px solid var(--border);
+  border-radius:var(--r-base);padding:.6rem .75rem;
+  display:flex;flex-direction:column;gap:.25rem;min-width:0;
+}
+.mat-nama{
+  font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--text-muted);font-weight:600;line-height:1.35;
+  overflow-wrap:anywhere;
+}
+.mat-nilai{
+  font-family:var(--font-head);font-size:17px;font-weight:800;
+  color:var(--accent);line-height:1.2;
+}
+.mat-nilai span{font-size:11.5px;font-weight:600;color:var(--text-muted)}
+.mat-sel.error{border-color:#FCD34D;background:var(--st-warning-bg,#FEF3C7)}
+.mat-galat{font-size:11.5px;font-weight:600;color:#B45309}
+
+@media (max-width:420px){
+  .mat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mat-nilai{font-size:15.5px}
+}
+
+/* ══════════════════════════════════════════════════════════
+   RUMUS MATERIAL (Pengaturan)
+   ══════════════════════════════════════════════════════════ */
+.mat-row{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:.7rem;
+  background:var(--bg-subtle);border:1px solid var(--border);
+  border-radius:var(--r-base);padding:.7rem .85rem;margin-bottom:.45rem;
+}
+.mat-row.nonaktif{opacity:.6}
+.mat-info{display:flex;flex-direction:column;gap:.25rem;min-width:0;flex:1}
+.mat-info b{
+  font-size:13px;font-family:var(--font-head);line-height:1.3;
+  display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;
+}
+.mat-satuan{
+  font-family:var(--font-body);font-size:10px;font-weight:700;letter-spacing:.06em;
+  background:var(--accent-soft);color:var(--accent);
+  border-radius:99px;padding:.1rem .45rem;
+}
+.mat-off{
+  font-family:var(--font-body);font-size:10px;font-weight:600;
+  background:var(--bg-inset);color:var(--text-faint);
+  border-radius:99px;padding:.1rem .45rem;
+}
+.mat-filter{font-size:11px;color:var(--text-muted)}
+.mat-rumus{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:11px;line-height:1.5;color:var(--text-muted);
+  background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:.35rem .5rem;
+  overflow-wrap:anywhere;white-space:pre-wrap;
+}
+.mat-aksi{display:flex;align-items:center;gap:.2rem;flex:none}
+.mat-aksi .btn-ghost{min-height:34px;padding:.3rem .6rem;font-size:11.5px}
+
+@media (max-width:520px){
+  .mat-row{flex-direction:column;align-items:stretch}
+  .mat-aksi{justify-content:flex-end}
+}
+
+/* Kotak uji rumus di dalam modal */
+.mat-uji{
+  margin-top:.5rem;padding:.55rem .75rem;border-radius:var(--r-base);
+  font-size:11.5px;line-height:1.5;
+  background:var(--bg-inset);color:var(--text-muted);
+}
+.mat-uji.ok{background:var(--accent-soft);color:var(--accent)}
+.mat-uji.galat{background:var(--st-danger-bg);color:var(--st-danger-fg)}
+.mat-uji i{margin-right:.3rem}
+
+.mat-bantuan{
+  background:var(--bg-subtle);border:1px solid var(--border);
+  border-radius:var(--r-base);padding:.55rem .75rem;
+}
+.mat-bantuan summary{
+  cursor:pointer;font-size:12px;font-weight:600;color:var(--accent);
+}
+.mat-bantuan-isi{margin-top:.6rem;font-size:11.5px;line-height:1.6;color:var(--text-muted)}
+.mat-bantuan-isi p{margin:0 0 .5rem}
+.mat-bantuan-isi ul{margin:0 0 .6rem;padding-left:1.1rem}
+.mat-bantuan-isi li{margin-bottom:.2rem}
+.mat-bantuan-isi code{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:11px;background:var(--bg-card);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:.05rem .3rem;
+}
+#matRumus{
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  font-size:12px;line-height:1.6;resize:vertical;
+}
+
+/* ══════════════════════════════════════════════════════════
    DATA CUSTOMER (Pengaturan)
    ══════════════════════════════════════════════════════════ */
 .cust-row{

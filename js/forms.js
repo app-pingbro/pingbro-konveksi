@@ -185,6 +185,10 @@ function terapkanAlurProduksi(resetItem) {
   if (panelSablon)   panelSablon.hidden   = !cfg.sablon;
   if (panelScreen)   panelScreen.hidden   = !cfg.screen;
 
+  // Kebutuhan material hanya relevan untuk alur yang memakai kategori & ukuran
+  const panelMaterial = document.getElementById('panelMaterial');
+  if (panelMaterial) panelMaterial.hidden = !cfg.kategori;
+
   const subItem = document.getElementById('subBlokItem');
   if (subItem) subItem.innerHTML = cfg.subItem;
 
@@ -522,6 +526,42 @@ function hitungTotalOrder() {
 
   const box = document.querySelector('.sisa-box');
   if (box) box.classList.toggle('lunas', sisa === 0 && total > 0);
+
+  // Kebutuhan material ikut terhitung ulang di sini — tidak ada tombol "Hitung"
+  renderMaterialForm();
+}
+
+/**
+ * Gambar ulang RINCIAN MATERIAL pada form order.
+ * Sumber datanya persis sama dengan yang nanti dikirim ke server
+ * (kumpulkanItems), jadi tidak ada input jumlah kedua yang terpisah.
+ */
+function renderMaterialForm() {
+  const kotak = document.getElementById('materialRows');
+  if (!kotak) return;
+
+  const bahan = (document.getElementById('orderBahan') || {}).value || '';
+  const label = document.getElementById('materialBahan');
+  if (label) label.textContent = 'Bahan: ' + (bahan.trim() || '—');
+
+  const items = kumpulkanItems().filter(function (i) { return i.ukuran && i.ukuran !== '-'; });
+  kotak.innerHTML = htmlRincianMaterial(
+    materialTerpakai(items, bahan),
+    { bahan: bahan, adaItem: items.length > 0 }
+  );
+}
+
+/** Bentuk ringkas hasil material untuk disimpan bersama order. */
+function arsipMaterial(items) {
+  const bahan = konfigAlur().bahan
+    ? (document.getElementById('orderBahan').value || '').trim() : '';
+  const berukuran = (items || []).filter(function (i) { return i.ukuran && i.ukuran !== '-'; });
+
+  return materialTerpakai(berukuran, bahan)
+    .filter(function (m) { return !m.error; })
+    .map(function (m) {
+      return { id: m.id, nama: m.nama, satuan: m.satuan, rumus: m.rumus, hasil: m.hasil };
+    });
 }
 
 /**
@@ -951,7 +991,11 @@ function simpanOrder(event) {
     dp             : nilaiInput(document.getElementById('orderDp')),
     metodeBayar    : document.getElementById('metodeBayar').value,
     items          : items,
-    mockup         : AppState.mockup
+    mockup         : AppState.mockup,
+    // Kebutuhan material ikut dikirim sebagai ARSIP: angkanya persis yang
+    // dilihat Owner di layar saat menyimpan, beserta teks rumus yang dipakai.
+    // Mengubah rumus di kemudian hari tidak mengubah arsip order ini.
+    material       : arsipMaterial(items)
   };
 
   const btn = document.getElementById('btnSimpanOrder');
@@ -1015,7 +1059,189 @@ function isiFormPengaturan() {
   set('setPin2', '');
 
   renderDaftarCustomer();
+  renderDaftarMaterial();
   segarkanPratinjauOg();
+}
+
+// ══════════════════════════════════════════════════════════
+// BAGIAN 13D: RUMUS MATERIAL
+//
+// Seluruh rumus tersimpan sebagai baris di sheet Master_Material.
+// Owner menambah, mengubah, dan menghapusnya dari sini — tidak perlu
+// menyentuh kode aplikasi sama sekali.
+// ══════════════════════════════════════════════════════════
+
+/** Daftar material beserta rumus ringkasnya. */
+function renderDaftarMaterial() {
+  const box = document.getElementById('listMaterial');
+  if (!box) return;
+
+  const daftar = AppState.material || [];
+  if (!daftar.length) {
+    box.innerHTML = '<div class="empty-state"><i class="bi bi-rulers"></i>' +
+      'Belum ada material. Tekan "Tambah Material" untuk membuat yang pertama.</div>';
+    return;
+  }
+
+  box.innerHTML = daftar.map(function (m) {
+    const aktif = m.Aktif !== false;
+    const penyaring = [
+      m.Produk ? escapeHtml(m.Produk) : 'semua produk',
+      m.Bahan  ? 'bahan "' + escapeHtml(m.Bahan) + '"' : 'semua bahan'
+    ].join(' · ');
+
+    return '<div class="mat-row' + (aktif ? '' : ' nonaktif') + '">' +
+      '<div class="mat-info">' +
+        '<b>' + escapeHtml(m.Nama) +
+          '<span class="mat-satuan">' + escapeHtml(m.Satuan || 'Kg') + '</span>' +
+          (aktif ? '' : '<span class="mat-off">nonaktif</span>') +
+        '</b>' +
+        '<span class="mat-filter">' + penyaring + '</span>' +
+        '<code class="mat-rumus">' +
+          (String(m.Rumus || '').trim() ? escapeHtml(m.Rumus) : 'Rumus belum diisi') +
+        '</code>' +
+      '</div>' +
+      '<div class="mat-aksi">' +
+        '<button type="button" class="btn-ghost" onclick="bukaFormMaterial(\'' + escapeAttr(m.ID) + '\')">' +
+          '<i class="bi bi-pencil"></i> Edit</button>' +
+        '<button type="button" class="btn-remove" title="Hapus material" ' +
+          'onclick="hapusMaterial(\'' + escapeAttr(m.ID) + '\',\'' + escapeAttr(m.Nama) + '\')">' +
+          '<i class="bi bi-trash"></i></button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+/** Buka modal untuk menambah (id kosong) atau mengubah material. */
+function bukaFormMaterial(id) {
+  const m = (AppState.material || []).filter(function (x) { return x.ID === id; })[0] || {};
+  const set = function (kotak, nilai) { document.getElementById(kotak).value = nilai || ''; };
+
+  document.getElementById('materialTitle').textContent = id ? 'Ubah Rumus Material' : 'Material Baru';
+  set('matId', m.ID || '');
+  set('matNama', m.Nama || '');
+  set('matSatuan', m.Satuan || 'Kg');
+  set('matProduk', m.Produk || '');
+  set('matBahan', m.Bahan || '');
+  set('matRumus', m.Rumus || '');
+  document.getElementById('matAktif').checked = (m.Aktif !== false);
+
+  cobaRumusMaterial();
+  new bootstrap.Modal(document.getElementById('materialModal')).show();
+}
+
+/**
+ * Periksa rumus sambil diketik memakai contoh sederhana,
+ * supaya kesalahan penulisan ketahuan sebelum disimpan.
+ */
+function cobaRumusMaterial() {
+  const kotak = document.getElementById('matUji');
+  if (!kotak) return;
+
+  const rumus = (document.getElementById('matRumus').value || '').trim();
+  if (!rumus) {
+    kotak.className = 'mat-uji';
+    kotak.innerHTML = 'Rumus masih kosong — material tidak akan ikut dihitung.';
+    return;
+  }
+
+  // Contoh: 10 pcs di tiap ukuran untuk tiga kategori (70 pcs per kategori)
+  const contoh = [];
+  ['COWOK', 'CEWEK', 'ANAK'].forEach(function (kat) {
+    UKURAN_BAKU.forEach(function (u) {
+      contoh.push({ jenisProduk: 'Kaos', kategori: kat, ukuran: u, jumlah: 10 });
+    });
+  });
+
+  const satuan = (document.getElementById('matSatuan').value || 'Kg').trim();
+  try {
+    const nilai = hitungRumus(rumus, pembacaVariabel(contoh,
+      { Produk: '', Bahan: '' }, ''));
+    if (!isFinite(nilai)) throw new Error('Hasil perhitungan tidak masuk akal.');
+    kotak.className = 'mat-uji ok';
+    kotak.innerHTML = '<i class="bi bi-check-circle"></i> Rumus terbaca. ' +
+      'Contoh: bila tiap ukuran berisi 10 pcs untuk COWOK, CEWEK, dan ANAK → <b>' +
+      escapeHtml(nilaiMaterial(nilai, satuan)) + '</b>';
+  } catch (e) {
+    kotak.className = 'mat-uji galat';
+    kotak.innerHTML = '<i class="bi bi-exclamation-triangle"></i> ' + escapeHtml(e.message);
+  }
+}
+
+/** Simpan material baru atau perubahan rumus. */
+function simpanMaterial() {
+  const nama = (document.getElementById('matNama').value || '').trim();
+  if (!nama) { toast('Nama kosong', 'Isi nama material terlebih dahulu.', 'warning'); return; }
+
+  const rumus = (document.getElementById('matRumus').value || '').trim();
+  if (rumus) {
+    try {
+      hitungRumus(rumus, function () { return 0; });
+    } catch (e) {
+      toast('Rumus belum benar', e.message, 'danger');
+      return;
+    }
+  }
+
+  const data = {
+    ID     : document.getElementById('matId').value || '',
+    Nama   : nama,
+    Satuan : (document.getElementById('matSatuan').value || 'Kg').trim() || 'Kg',
+    Produk : (document.getElementById('matProduk').value || '').trim(),
+    Bahan  : (document.getElementById('matBahan').value || '').trim(),
+    Rumus  : rumus,
+    Aktif  : document.getElementById('matAktif').checked
+  };
+
+  busy(true, 'Menyimpan rumus material…');
+  apiCall('saveMaterial', { material: data })
+    .then(function (res) {
+      busy(false);
+      if (!res || !res.success) {
+        toast('Gagal', res ? res.message : 'Tidak ada respons.', 'danger');
+        return;
+      }
+      tutupLapisanAtas();
+      segarkanMaterial();
+      toast('Tersimpan', res.message, 'success');
+    })
+    .catch(function (err) { busy(false); toast('Error', pesanError(err), 'danger'); });
+}
+
+/** Hapus satu material dari daftar rumus. */
+function hapusMaterial(id, nama) {
+  konfirmasi('Hapus Material',
+    'Material "' + nama + '" akan dihapus dari daftar rumus.\n\n' +
+    'Hasil perhitungan pada order yang sudah tersimpan TIDAK ikut terhapus — ' +
+    'angka historisnya tetap tercatat.\n\nLanjutkan?',
+    function () {
+      busy(true, 'Menghapus material…');
+      apiCall('deleteMaterial', { id: id })
+        .then(function (res) {
+          busy(false);
+          if (!res || !res.success) {
+            toast('Gagal', res ? res.message : 'Tidak ada respons.', 'danger');
+            return;
+          }
+          segarkanMaterial();
+          toast('Material dihapus', res.message, 'success');
+        })
+        .catch(function (err) { busy(false); toast('Error', pesanError(err), 'danger'); });
+    });
+}
+
+/** Ambil ulang daftar material dari server lalu gambar ulang yang terpengaruh. */
+function segarkanMaterial() {
+  apiCall('getBootstrapData')
+    .then(function (res) {
+      if (!res || !res.success) return;
+      AppState.material = res.data.material || [];
+      simpanCacheLokal();
+      renderDaftarMaterial();
+      // Form order yang sedang terbuka ikut menyesuaikan rumus terbaru
+      if (document.getElementById('materialRows')) renderMaterialForm();
+    })
+    .catch(function () { /* daftar akan segar saat data dimuat ulang */ });
 }
 
 // ══════════════════════════════════════════════════════════

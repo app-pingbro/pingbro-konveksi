@@ -404,6 +404,9 @@ function htmlDetailOrder(d) {
       htmlRincianItem(o.Items) +
     '</div>' +
 
+    // ── Rincian material — kebutuhan bahan dari rincian item di atas ──
+    kartuMaterialDetail(d) +
+
     '<div class="card-surface mb-3">' +
       '<div class="card-head"><div><h2 class="card-title">Keuangan</h2>' +
         '<p class="card-sub">' + (inv ? escapeHtml(inv.NomorInvoice) : 'Invoice belum dibuat') + '</p></div></div>' +
@@ -537,6 +540,45 @@ function perbesarMockup(nomorOrder) {
  * Tampilkan item order memakai struktur kartu yang sama dengan
  * panel RINCIAN UKURAN pada halaman Buat Order Baru — hanya baca.
  */
+/**
+ * Kartu RINCIAN MATERIAL pada Detail Order.
+ *
+ * Angka yang ditampilkan adalah hasil yang TERCATAT saat order terakhir
+ * disimpan, bukan hitungan ulang. Dengan begitu mengubah rumus di kemudian
+ * hari tidak mengubah angka pada order-order lama.
+ *
+ * Untuk order lama yang dibuat sebelum fitur ini ada, arsipnya kosong —
+ * angkanya dihitung ulang memakai rumus yang berlaku sekarang, dan hal itu
+ * disebutkan terus terang pada keterangan kartunya.
+ */
+function kartuMaterialDetail(d) {
+  const o = d.order || {};
+  const items = o.Items || [];
+  const arsip = d.material || [];
+  const dariArsip = arsip.length > 0;
+
+  const hasil = dariArsip
+    ? arsip.map(function (m) {
+        return { id: m.id, nama: m.nama, satuan: m.satuan, rumus: m.rumus, hasil: m.hasil, error: '' };
+      })
+    : materialTerpakai(items, o.Bahan);
+
+  const tanggal = dariArsip && arsip[0].dihitungPada ? formatTanggal(arsip[0].dihitungPada) : '';
+
+  return '<div class="card-surface mb-3">' +
+    '<div class="card-head"><div>' +
+      '<h2 class="card-title">Rincian Material</h2>' +
+      '<p class="card-sub">' +
+        (dariArsip
+          ? 'Kebutuhan bahan, dihitung saat order disimpan' + (tanggal ? ' · ' + tanggal : '')
+          : 'Dihitung ulang memakai rumus yang berlaku sekarang') +
+      '</p></div>' +
+      (o.Bahan ? '<span class="chip chip-navy">' + escapeHtml(o.Bahan) + '</span>' : '') +
+    '</div>' +
+    htmlRincianMaterial(hasil, { bahan: o.Bahan, adaItem: items.length > 0 }) +
+  '</div>';
+}
+
 function htmlRincianItem(items) {
   if (!items || !items.length) {
     return '<div class="item-empty"><i class="bi bi-inbox"></i>Order ini belum memiliki rincian item.</div>';

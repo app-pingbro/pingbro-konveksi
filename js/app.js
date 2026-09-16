@@ -16,6 +16,7 @@ const AppState = {
   invoices    : [],
   masterHarga : [],
   customers   : [],
+  material    : [],        // daftar rumus material (Pengaturan → Rumus Material)
   dashboard   : null,
   tahapProduksi: [],       // daftar tahapan checklist produksi dari server
   serverDate  : '',
@@ -205,6 +206,7 @@ function muatCacheLokal() {
       config: cache.config || {}, orders: cache.orders || [],
       spk: cache.spk || [], invoices: cache.invoices || [],
       masterHarga: cache.masterHarga || [], customers: cache.customers || [],
+      material: cache.material || [],
       dashboard: cache.dashboard || null, serverDate: cache.serverDate || '',
       tahapProduksi: cache.tahapProduksi || []
     });
@@ -217,7 +219,8 @@ function simpanCacheLokal() {
     localStorage.setItem(CACHE_KEY, JSON.stringify({
       config: AppState.config, orders: AppState.orders, spk: AppState.spk,
       invoices: AppState.invoices, masterHarga: AppState.masterHarga,
-      customers: AppState.customers, dashboard: AppState.dashboard,
+      customers: AppState.customers, material: AppState.material,
+      dashboard: AppState.dashboard,
       serverDate: AppState.serverDate, tahapProduksi: AppState.tahapProduksi
     }));
   } catch (e) { /* kuota penuh — abaikan */ }
@@ -240,6 +243,7 @@ function muatDataServer(pertamaKali) {
       AppState.invoices    = d.invoices || [];
       AppState.masterHarga = d.masterHarga || [];
       AppState.customers   = d.customers || [];
+      AppState.material    = d.material || [];
       AppState.dashboard   = d.dashboard || null;
       AppState.tahapProduksi = d.tahapProduksi || [];
       AppState.serverDate  = d.serverDate || '';
@@ -538,6 +542,7 @@ function refreshSemua() {
         AppState.orders = d.orders; AppState.spk = d.spk;
         AppState.invoices = d.invoices; AppState.masterHarga = d.masterHarga;
         AppState.customers = d.customers; AppState.dashboard = d.dashboard;
+        AppState.material = d.material || AppState.material;
         AppState.config = d.config; AppState.serverDate = d.serverDate;
         AppState.tahapProduksi = d.tahapProduksi || AppState.tahapProduksi;
         simpanCacheLokal();
