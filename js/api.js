@@ -101,6 +101,15 @@ function apiCall(aksi, args) {
         hapusToken();
         if (typeof tampilkanLayarPin === 'function') tampilkanLayarPin(hasil.message);
       }
+
+      // Backend mengenali aksi berarti kodenya sudah aktif. Bila tidak, hampir
+      // selalu karena kode baru sudah ditempel tapi BELUM di-deploy sebagai versi
+      // baru — menekan Ctrl+S saja tidak mengubah apa yang dijalankan /exec.
+      if (hasil && hasil.success === false &&
+          String(hasil.message || '').indexOf('Aksi tidak dikenal') === 0) {
+        hasil.message = 'Backend masih memakai kode versi lama (' + aksi + ' belum dikenali). ' +
+          'Di Apps Script: Deploy → Manage deployments → ikon pensil → Version: New version → Deploy.';
+      }
       return hasil;
     });
 }

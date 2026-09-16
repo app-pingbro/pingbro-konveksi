@@ -411,6 +411,47 @@ git push
 GitHub Pages membangun ulang dalam 1–2 menit. Kalau masih tampil versi lama,
 itu cache browser — tekan **Ctrl+Shift+R**, atau buka di jendela **Incognito**.
 
+## Memastikan versi backend yang aktif
+
+Menekan **Ctrl+S** di editor Apps Script **tidak** mengubah apa yang dijalankan
+`/exec`. Yang dijalankan adalah **versi deployment**, dan versi baru harus dibuat
+sendiri. Inilah sebab paling umum munculnya pesan *"Aksi tidak dikenal"*.
+
+### Cara memeriksa
+
+Buka alamat ini di tab browser (ganti dengan URL `/exec` Anda):
+
+```
+https://script.google.com/macros/s/AKfycb...../exec?action=ping
+```
+
+Yang keluar berupa teks JSON. Perhatikan dua bagian:
+
+```json
+"versi": "2.2.0",
+"sheetMaterial": true,
+"aksiTulis": [ ... "saveMaterial", "deleteMaterial" ... ]
+```
+
+| Yang terlihat | Artinya |
+|---|---|
+| `versi` bukan `2.2.0` | Deployment masih kode lama → buat versi baru |
+| `saveMaterial` tidak ada di `aksiTulis` | Deployment masih kode lama → buat versi baru |
+| `sheetMaterial: false` | `migrasiMaterial()` belum dijalankan |
+| Semua sesuai, tapi aplikasi tetap gagal | `GAS_URL` di `js/config.js` menunjuk deployment yang berbeda |
+
+### Cara membuat versi baru (URL tidak berubah)
+
+1. Di Apps Script: **Deploy** → **Manage deployments**
+2. Klik ikon **✏️ (Edit)** pada deployment yang sedang dipakai
+3. **Version** → pilih **New version**
+4. **Deploy**
+
+> Gunakan **Manage deployments**, bukan **New deployment**. "New deployment"
+> membuat URL `/exec` yang berbeda sehingga `js/config.js` harus diubah juga.
+
+---
+
 ## Menambahkan sheet baru (mis. saat fitur Rincian Material dipasang)
 
 Sebagian pembaruan butuh tabel baru di database. Caranya:
@@ -472,6 +513,7 @@ dan material bawaan hanya ditambahkan bila daftarnya masih kosong.
 | Data tidak muncul, log Apps Script kosong | `setupAppEnvironment()` belum dijalankan | Jalankan sekali (langkah A3) |
 | Rincian Material kosong padahal pcs sudah diisi | Kata kunci bahan tidak cocok, atau jenis produk tidak termasuk penyaring | Keterangannya muncul di tempat rincian; sesuaikan di Pengaturan → Rumus Material |
 | Pengaturan → Rumus Material kosong | Sheet `Master_Material` belum dibuat | Jalankan `migrasiMaterial()` di Apps Script, lalu deploy versi baru |
+| **"Aksi tidak dikenal: …"** atau **"Backend masih memakai kode versi lama"** | Kode baru sudah ditempel tapi belum di-deploy sebagai versi baru | Deploy → Manage deployments → ✏️ → **Version: New version** → Deploy. Lihat **Memastikan versi backend** di bawah |
 | Angka material di order lama berbeda dari rumus sekarang | Memang begitu — yang tampil adalah hasil historis saat order disimpan | Buka Edit Order lalu simpan lagi bila ingin dihitung ulang |
 | Gambar SPK/Invoice lama muncul | Dokumen padat butuh beberapa detik untuk dirender di browser | Tunggu sampai selesai; jangan menekan tombol cetak berkali-kali |
 | Mockup tidak ikut tercetak | Gambar mockup gagal diambil dari Drive | Di tempatnya akan muncul keterangan + tautan Drive; buka mockup lewat Detail Order |
