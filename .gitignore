@@ -1,0 +1,11 @@
+# Dibuat otomatis oleh Vercel saat deploy — jangan pernah di-commit
+js/config.js
+
+# Kunci rahasia untuk skrip migrasi di komputer sendiri
+.env
+.env.local
+
+# Sampah sistem
+.DS_Store
+Thumbs.db
+node_modules/
