@@ -21,6 +21,19 @@ gagal() { echo ""; echo "❌ $1"; echo ""; exit 1; }
 # ── Mode data: 'gas' (lama, aman) atau 'supabase' (baru) ──────────
 SUMBER_DATA="${SUMBER_DATA:-gas}"
 
+# ── Mode login: 'pin' (lama, aman) atau 'google' (Supabase Auth) ──
+MODE_LOGIN="${MODE_LOGIN:-pin}"
+
+case "$MODE_LOGIN" in
+  pin|google) ;;
+  *) gagal "MODE_LOGIN hanya boleh 'pin' atau 'google'. Terbaca: '$MODE_LOGIN'" ;;
+esac
+
+if [ "$MODE_LOGIN" = "google" ]; then
+  [ -n "${SUPABASE_URL:-}" ]      || gagal "MODE_LOGIN=google tapi SUPABASE_URL belum diisi."
+  [ -n "${SUPABASE_ANON_KEY:-}" ] || gagal "MODE_LOGIN=google tapi SUPABASE_ANON_KEY belum diisi."
+fi
+
 if [ "$SUMBER_DATA" = "supabase" ]; then
   [ -n "${SUPABASE_URL:-}" ]      || gagal "SUMBER_DATA=supabase tapi SUPABASE_URL belum diisi."
   [ -n "${SUPABASE_ANON_KEY:-}" ] || gagal "SUMBER_DATA=supabase tapi SUPABASE_ANON_KEY belum diisi."
@@ -49,6 +62,9 @@ const KONFIG = {
   // Sumber data: 'gas' = Google Sheets (lama) · 'supabase' = PostgreSQL (baru)
   SUMBER_DATA : '${SUMBER_DATA}',
 
+  // Cara masuk: 'pin' = PIN lewat Apps Script · 'google' = akun Google (Supabase)
+  MODE_LOGIN  : '${MODE_LOGIN}',
+
   // Apps Script — tetap dipakai untuk mockup di Google Drive
   GAS_URL     : '${GAS_URL}',
 
@@ -68,9 +84,9 @@ function konfigBelumDiisi() {
 }
 EOF
 
-echo "✅ js/config.js dibuat — SUMBER_DATA=${SUMBER_DATA}"
+echo "✅ js/config.js dibuat — SUMBER_DATA=${SUMBER_DATA} · MODE_LOGIN=${MODE_LOGIN}"
 echo "   GAS_URL       : ${GAS_URL:0:45}…"
-if [ "$SUMBER_DATA" = "supabase" ]; then
+if [ "$SUMBER_DATA" = "supabase" ] || [ "$MODE_LOGIN" = "google" ]; then
   echo "   SUPABASE_URL  : ${SUPABASE_URL}"
   echo "   ANON_KEY      : ${SUPABASE_ANON_KEY:0:12}… (${#SUPABASE_ANON_KEY} karakter)"
 fi

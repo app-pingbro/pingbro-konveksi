@@ -1,11 +1,25 @@
-# Dibuat otomatis oleh Vercel saat deploy — jangan pernah di-commit
+# ════════════════════════════════════════════════════════════
+#  Berkas yang TIDAK BOLEH masuk GitHub
+# ════════════════════════════════════════════════════════════
+
+# Dibuat otomatis oleh Vercel saat deploy — berisi alamat & kunci
 js/config.js
+
+# Catatan pribadi berisi alamat/kunci
+URL.txt
+url.txt
+catatan.txt
+kunci.txt
+*.key
 
 # Kunci rahasia untuk skrip migrasi di komputer sendiri
 .env
 .env.local
+.env.*.local
 
 # Sampah sistem
 .DS_Store
 Thumbs.db
+desktop.ini
 node_modules/
+.vercel

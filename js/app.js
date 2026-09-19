@@ -47,12 +47,66 @@ document.addEventListener('DOMContentLoaded', function () {
   pasangGesturKembali();   // geser dari tepi kiri = kembali (ponsel)
   pasangTombolBackBrowser();
 
-  // Aplikasi berdiri sendiri di GitHub Pages, jadi PIN adalah gerbang pertama.
+  // Aplikasi berdiri sendiri, jadi layar masuk adalah gerbang pertama.
   if (konfigBelumDiisi()) { gagalKonfigurasi(); return; }
-  if (!ambilToken()) { tampilkanLayarPin(); return; }
 
+  if (typeof authAktif === 'function' && authAktif()) { bootGoogle(); return; }
+
+  if (!ambilToken()) { tampilkanLayarPin(); return; }
   mulaiAplikasi();
 });
+
+/**
+ * Gerbang masuk untuk MODE_LOGIN='google'.
+ *
+ * Tiga keadaan yang mungkin:
+ *   a. baru kembali dari Google (?code=… atau ?error=…) → selesaikan penukaran
+ *   b. sudah punya sesi tersimpan                        → langsung masuk
+ *   c. belum punya apa-apa                               → tampilkan tombol Google
+ */
+function bootGoogle() {
+  if (authAdaError()) {
+    const pesan = authAdaError();
+    authBersihkanUrl();
+    tampilkanLayarPin(pesan);
+    return;
+  }
+
+  if (authAdaKode()) {
+    tampilkanLayarPin('');
+    tandaiTombolGoogle(true, 'Menyelesaikan masuk…');
+    authSelesaikanLogin()
+      .then(function () { tandaiTombolGoogle(false); mulaiAplikasi(); })
+      .catch(function (err) {
+        tandaiTombolGoogle(false);
+        tampilkanLayarPin(pesanError(err));
+      });
+    return;
+  }
+
+  if (authSesi()) { mulaiAplikasi(); return; }
+  tampilkanLayarPin();
+}
+
+/** Klik tombol "Masuk dengan Google". */
+function masukDenganGoogle() {
+  tampilkanPesanPin('');
+  tandaiTombolGoogle(true, 'Mengarahkan ke Google…');
+  authMulaiLogin().catch(function (err) {
+    tandaiTombolGoogle(false);
+    tampilkanPesanPin(pesanError(err));
+  });
+}
+
+/** Kunci/buka tombol Google selagi proses berjalan. */
+function tandaiTombolGoogle(sibuk, teks) {
+  const t = document.getElementById('googleBtn');
+  if (!t) return;
+  t.disabled = !!sibuk;
+  t.innerHTML = sibuk
+    ? '<i class="bi bi-hourglass-split"></i> ' + (teks || 'Memproses…')
+    : '<span class="g-logo" aria-hidden="true"></span> Masuk dengan Google';
+}
 
 /** Jalankan aplikasi setelah PIN diterima (atau token lama masih berlaku). */
 function mulaiAplikasi() {
@@ -93,7 +147,17 @@ function tampilkanLayarPin(pesan) {
 
   layar.hidden = false;
   document.body.classList.add('terkunci');
+
+  // Satu layar, dua kartu — yang tampil ditentukan MODE_LOGIN.
+  const pakaiGoogle = (typeof authAktif === 'function' && authAktif());
+  const kartuPin    = document.getElementById('loginKartuPin');
+  const kartuGoogle = document.getElementById('loginKartuGoogle');
+  if (kartuPin)    kartuPin.hidden    = pakaiGoogle;
+  if (kartuGoogle) kartuGoogle.hidden = !pakaiGoogle;
+
   tampilkanPesanPin(pesan || '');
+
+  if (pakaiGoogle) { tandaiTombolGoogle(false); return; }
 
   const isian = document.getElementById('pinInput');
   if (isian) { isian.value = ''; setTimeout(function () { isian.focus(); }, 60); }
@@ -106,7 +170,8 @@ function sembunyikanLayarPin() {
 }
 
 function tampilkanPesanPin(pesan) {
-  const kotak = document.getElementById('pinError');
+  const pakaiGoogle = (typeof authAktif === 'function' && authAktif());
+  const kotak = document.getElementById(pakaiGoogle ? 'googleError' : 'pinError');
   if (!kotak) return;
   kotak.textContent = pesan || '';
   kotak.hidden = !pesan;
@@ -149,9 +214,13 @@ function kirimPin(e) {
 
 /** Keluar: hapus token & cache lokal, lalu kembali ke layar PIN. */
 function keluarAplikasi() {
+  const pakaiGoogle = (typeof authAktif === 'function' && authAktif());
   konfirmasi('Keluar Aplikasi',
-    'Sesi di perangkat ini akan diakhiri dan PIN diminta lagi saat membuka aplikasi. Lanjutkan?',
+    pakaiGoogle
+      ? 'Sesi di perangkat ini akan diakhiri dan Anda perlu masuk lagi dengan akun Google. Lanjutkan?'
+      : 'Sesi di perangkat ini akan diakhiri dan PIN diminta lagi saat membuka aplikasi. Lanjutkan?',
     function () {
+      if (pakaiGoogle && typeof authKeluar === 'function') authKeluar();
       hapusToken();
       try { localStorage.removeItem(CACHE_KEY); } catch (e) {}
       location.reload();

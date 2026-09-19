@@ -37,6 +37,31 @@ function hapusToken() {
   try { localStorage.removeItem(KONFIG.KUNCI_TOKEN); } catch (e) {}
 }
 
+/**
+ * Token untuk permintaan berikutnya, sesuai MODE_LOGIN.
+ *
+ *  • 'pin'    → token HMAC dari Apps Script (tersimpan di localStorage)
+ *  • 'google' → access_token Supabase, diperbarui sendiri bila hampir habis
+ *
+ * Selalu Promise, supaya apiCall() tidak perlu tahu mana yang sedang dipakai.
+ */
+function ambilTokenAsync() {
+  if (typeof authAktif === 'function' && authAktif()) {
+    return authTokenAkses();
+  }
+  return Promise.resolve(ambilToken());
+}
+
+/** Bersihkan sesi apa pun dan kembalikan pengguna ke layar masuk. */
+function keluarSesi(pesan) {
+  if (typeof authAktif === 'function' && authAktif()) {
+    if (typeof authKeluar === 'function') authKeluar();
+  } else {
+    hapusToken();
+  }
+  if (typeof tampilkanLayarPin === 'function') tampilkanLayarPin(pesan || '');
+}
+
 // ── Pemanggil utama ───────────────────────────────────────
 
 /**
@@ -60,7 +85,18 @@ function apiCall(aksi, args) {
       'dengan URL /exec dari Google Apps Script Anda.'));
   }
 
-  const token = ambilToken();
+  return ambilTokenAsync().then(
+    function (token) { return apiKirim(aksi, args, token); },
+    function (err) {
+      // Belum masuk / sesi habis pada mode Google — tidak perlu menembak server.
+      if (err && err.perluLogin) keluarSesi(err.message);
+      throw err;
+    }
+  );
+}
+
+/** Bagian yang benar-benar menembak jaringan. Token sudah dipastikan siap. */
+function apiKirim(aksi, args, token) {
   const bacaSaja = AKSI_BACA.indexOf(aksi) !== -1;
 
   let url = KONFIG.GAS_URL;
@@ -98,8 +134,7 @@ function apiCall(aksi, args) {
       }
       // Sesi habis → paksa kembali ke layar PIN
       if (hasil && hasil.perluLogin) {
-        hapusToken();
-        if (typeof tampilkanLayarPin === 'function') tampilkanLayarPin(hasil.message);
+        keluarSesi(hasil.message);
       }
 
       // Backend mengenali aksi berarti kodenya sudah aktif. Bila tidak, hampir

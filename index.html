@@ -79,7 +79,28 @@
      Muncul bila belum ada token, token kedaluwarsa, atau PIN diganti.
      ══════════════════════════════════════════════════════ -->
 <div id="loginScreen" class="login-screen" hidden>
-  <form class="login-card" onsubmit="kirimPin(event)">
+
+  <!-- Kartu A — masuk dengan akun Google (MODE_LOGIN='google') -->
+  <div id="loginKartuGoogle" class="login-card" hidden>
+    <div class="login-logo logo-plate" role="img" aria-label="Logo PING BRO"></div>
+    <h1 class="login-title">Konveksi &amp; Sablon</h1>
+    <p class="login-sub">Masuk dengan akun Google yang sudah didaftarkan</p>
+
+    <div id="googleError" class="login-error" hidden></div>
+
+    <button id="googleBtn" type="button" class="btn-google btn-block login-btn"
+            onclick="masukDenganGoogle()">
+      <span class="g-logo" aria-hidden="true"></span> Masuk dengan Google
+    </button>
+
+    <p class="login-note">
+      Hanya email yang sudah diundang yang dapat membuka data.
+      Akun lain tetap ditolak meskipun berhasil masuk ke Google.
+    </p>
+  </div>
+
+  <!-- Kartu B — masuk dengan PIN (MODE_LOGIN='pin', bawaan) -->
+  <form id="loginKartuPin" class="login-card" onsubmit="kirimPin(event)">
     <div class="login-logo logo-plate" role="img" aria-label="Logo PING BRO"></div>
     <h1 class="login-title">Konveksi &amp; Sablon</h1>
     <p class="login-sub">Masukkan PIN akses untuk membuka aplikasi</p>
@@ -1335,6 +1356,7 @@
      cetak.js   : SPK & Invoice menjadi gambar JPG siap cetak
      ══════════════════════════════════════════════════════ -->
 <script src="js/config.js"></script>
+<script src="js/auth-google.js"></script>
 <script src="js/api.js"></script>
 <script src="js/app.js"></script>
 <script src="js/pages.js"></script>
